@@ -4,9 +4,20 @@ import { Header } from '@/components/landing/Header';
 import { Footer } from '@/components/landing/Footer';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Check, CreditCard, Shield } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getCurrentUser } from '@/lib/auth';
+
+const countries = [
+  'United States', 'United Kingdom', 'Canada', 'Australia', 'Germany', 
+  'France', 'Spain', 'Italy', 'Netherlands', 'Sweden', 'Norway', 
+  'Denmark', 'Finland', 'Switzerland', 'Austria', 'Belgium', 'Ireland',
+  'Poland', 'Portugal', 'Japan', 'South Korea', 'Singapore', 'India',
+  'Brazil', 'Mexico', 'Argentina', 'Other'
+];
 
 const plans: Record<string, { name: string; price: string; period: string; features: string[] }> = {
   free: {
@@ -43,14 +54,53 @@ export default function CheckoutPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<'stripe' | 'paypal' | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Billing form state
+  const [billingAddress, setBillingAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [country, setCountry] = useState('');
+  
+  // Card details state (for Stripe)
+  const [cardNumber, setCardNumber] = useState('');
+  const [expiryDate, setExpiryDate] = useState('');
+  const [cvv, setCvv] = useState('');
+  const [cardName, setCardName] = useState('');
 
   useEffect(() => {
     const user = getCurrentUser();
     setIsLoggedIn(!!user);
   }, []);
 
+  const formatCardNumber = (value: string) => {
+    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+    const matches = v.match(/\d{4,16}/g);
+    const match = (matches && matches[0]) || '';
+    const parts = [];
+    for (let i = 0, len = match.length; i < len; i += 4) {
+      parts.push(match.substring(i, i + 4));
+    }
+    return parts.length ? parts.join(' ') : value;
+  };
+
+  const formatExpiryDate = (value: string) => {
+    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+    if (v.length >= 2) {
+      return v.substring(0, 2) + '/' + v.substring(2, 4);
+    }
+    return v;
+  };
+
   const handlePayment = () => {
     if (!selectedPayment) return;
+    if (selectedPayment === 'stripe' && (!cardNumber || !expiryDate || !cvv || !cardName)) {
+      alert('Please fill in all card details');
+      return;
+    }
+    if (!billingAddress || !city || !postalCode || !country) {
+      alert('Please fill in your billing address');
+      return;
+    }
     
     setIsProcessing(true);
     // Mock payment processing
@@ -181,7 +231,61 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
+                {/* Billing Address Section */}
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium mb-3">Billing Address</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <Label htmlFor="address" className="text-xs text-muted-foreground">Street Address</Label>
+                      <Input
+                        id="address"
+                        placeholder="123 Main Street"
+                        value={billingAddress}
+                        onChange={(e) => setBillingAddress(e.target.value)}
+                        disabled={!isLoggedIn && plan.price !== '$0'}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label htmlFor="city" className="text-xs text-muted-foreground">City</Label>
+                        <Input
+                          id="city"
+                          placeholder="New York"
+                          value={city}
+                          onChange={(e) => setCity(e.target.value)}
+                          disabled={!isLoggedIn && plan.price !== '$0'}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="postal" className="text-xs text-muted-foreground">Postal Code</Label>
+                        <Input
+                          id="postal"
+                          placeholder="10001"
+                          value={postalCode}
+                          onChange={(e) => setPostalCode(e.target.value)}
+                          disabled={!isLoggedIn && plan.price !== '$0'}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="country" className="text-xs text-muted-foreground">Country</Label>
+                      <Select value={country} onValueChange={setCountry} disabled={!isLoggedIn && plan.price !== '$0'}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select country" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {countries.map((c) => (
+                            <SelectItem key={c} value={c}>{c}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Payment Method Selection */}
                 <div className="space-y-3 mb-6">
+                  <h3 className="text-sm font-medium">Payment Method</h3>
                   {/* Stripe Option */}
                   <button
                     onClick={() => setSelectedPayment('stripe')}
@@ -228,6 +332,57 @@ export default function CheckoutPage() {
                     </div>
                   </button>
                 </div>
+
+                {/* Card Details (shown when Stripe is selected) */}
+                {selectedPayment === 'stripe' && (
+                  <div className="mb-6 p-4 border border-border rounded-lg bg-muted/30">
+                    <h3 className="text-sm font-medium mb-3">Card Details</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <Label htmlFor="cardName" className="text-xs text-muted-foreground">Name on Card</Label>
+                        <Input
+                          id="cardName"
+                          placeholder="John Doe"
+                          value={cardName}
+                          onChange={(e) => setCardName(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="cardNumber" className="text-xs text-muted-foreground">Card Number</Label>
+                        <Input
+                          id="cardNumber"
+                          placeholder="1234 5678 9012 3456"
+                          value={cardNumber}
+                          onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
+                          maxLength={19}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label htmlFor="expiry" className="text-xs text-muted-foreground">Expiry Date</Label>
+                          <Input
+                            id="expiry"
+                            placeholder="MM/YY"
+                            value={expiryDate}
+                            onChange={(e) => setExpiryDate(formatExpiryDate(e.target.value))}
+                            maxLength={5}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="cvv" className="text-xs text-muted-foreground">CVV</Label>
+                          <Input
+                            id="cvv"
+                            placeholder="123"
+                            value={cvv}
+                            onChange={(e) => setCvv(e.target.value.replace(/\D/g, '').substring(0, 4))}
+                            maxLength={4}
+                            type="password"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <Button
                   className="w-full"
