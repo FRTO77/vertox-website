@@ -94,12 +94,12 @@ export function Header() {
             </Link>
 
             {/* Desktop Download */}
-            <a href="#download" target="_blank" rel="noopener noreferrer">
+            <Link to="/download">
               <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground gap-2">
                 <Download className="h-4 w-4" />
                 Desktop
               </Button>
-            </a>
+            </Link>
           </div>
 
           {/* Right side */}
