@@ -26,6 +26,7 @@ import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import CookiesPage from "./pages/CookiesPage";
 import PartnershipPage from "./pages/PartnershipPage";
+import DesktopDownloadPage from "./pages/DesktopDownloadPage";
 import DocsPage from "./pages/DocsPage";
 import DocsArticlePage from "./pages/DocsArticlePage";
 import BlogPage from "./pages/BlogPage";
@@ -77,6 +78,7 @@ const App = () => {
             <Route path="/cookies" element={<CookiesPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/partnership" element={<PartnershipPage />} />
+            <Route path="/download" element={<DesktopDownloadPage />} />
             <Route path="/docs" element={<DocsPage />} />
             <Route path="/docs/:category/:slug" element={<DocsArticlePage />} />
             <Route path="/blog" element={<BlogPage />} />
