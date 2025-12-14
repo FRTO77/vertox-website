@@ -54,6 +54,7 @@ export default function CheckoutPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<'stripe' | 'paypal' | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [step, setStep] = useState<'select' | 'details'>('select');
   
   // Billing form state
   const [billingAddress, setBillingAddress] = useState('');
@@ -66,6 +67,9 @@ export default function CheckoutPage() {
   const [expiryDate, setExpiryDate] = useState('');
   const [cvv, setCvv] = useState('');
   const [cardName, setCardName] = useState('');
+  
+  // PayPal email state
+  const [paypalEmail, setPaypalEmail] = useState('');
 
   useEffect(() => {
     const user = getCurrentUser();
@@ -91,10 +95,23 @@ export default function CheckoutPage() {
     return v;
   };
 
+  const handleSelectPayment = (method: 'stripe' | 'paypal') => {
+    setSelectedPayment(method);
+    setStep('details');
+  };
+
+  const handleBackToSelect = () => {
+    setStep('select');
+  };
+
   const handlePayment = () => {
     if (!selectedPayment) return;
     if (selectedPayment === 'stripe' && (!cardNumber || !expiryDate || !cvv || !cardName)) {
       alert('Please fill in all card details');
+      return;
+    }
+    if (selectedPayment === 'paypal' && !paypalEmail) {
+      alert('Please enter your PayPal email');
       return;
     }
     if (!billingAddress || !city || !postalCode || !country) {
@@ -106,8 +123,7 @@ export default function CheckoutPage() {
     // Mock payment processing
     setTimeout(() => {
       setIsProcessing(false);
-      // In a real implementation, this would redirect to the payment provider
-      alert(`Redirecting to ${selectedPayment === 'stripe' ? 'Stripe' : 'PayPal'} checkout...`);
+      alert(`Processing payment via ${selectedPayment === 'stripe' ? 'Stripe' : 'PayPal'}...`);
     }, 1500);
   };
 
@@ -206,8 +222,6 @@ export default function CheckoutPage() {
               animate={{ opacity: 1, x: 0 }}
             >
               <Card className="p-6 glass-card">
-                <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
-
                 {!isLoggedIn && (
                   <div className="bg-muted/50 border border-border rounded-lg p-4 mb-6">
                     <p className="text-sm text-muted-foreground mb-3">
@@ -231,181 +245,252 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                {/* Billing Address Section */}
-                <div className="mb-6">
-                  <h3 className="text-sm font-medium mb-3">Billing Address</h3>
-                  <div className="space-y-3">
-                    <div>
-                      <Label htmlFor="address" className="text-xs text-muted-foreground">Street Address</Label>
-                      <Input
-                        id="address"
-                        placeholder="123 Main Street"
-                        value={billingAddress}
-                        onChange={(e) => setBillingAddress(e.target.value)}
-                        disabled={!isLoggedIn && plan.price !== '$0'}
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label htmlFor="city" className="text-xs text-muted-foreground">City</Label>
-                        <Input
-                          id="city"
-                          placeholder="New York"
-                          value={city}
-                          onChange={(e) => setCity(e.target.value)}
-                          disabled={!isLoggedIn && plan.price !== '$0'}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="postal" className="text-xs text-muted-foreground">Postal Code</Label>
-                        <Input
-                          id="postal"
-                          placeholder="10001"
-                          value={postalCode}
-                          onChange={(e) => setPostalCode(e.target.value)}
-                          disabled={!isLoggedIn && plan.price !== '$0'}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="country" className="text-xs text-muted-foreground">Country</Label>
-                      <Select value={country} onValueChange={setCountry} disabled={!isLoggedIn && plan.price !== '$0'}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select country" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {countries.map((c) => (
-                            <SelectItem key={c} value={c}>{c}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Payment Method Selection */}
-                <div className="space-y-3 mb-6">
-                  <h3 className="text-sm font-medium">Payment Method</h3>
-                  {/* Stripe Option */}
-                  <button
-                    onClick={() => setSelectedPayment('stripe')}
-                    disabled={!isLoggedIn && plan.price !== '$0'}
-                    className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
-                      selectedPayment === 'stripe'
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-muted-foreground/50'
-                    } ${!isLoggedIn && plan.price !== '$0' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                {/* Step 1: Select Payment Method */}
+                {step === 'select' && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-8 bg-[#635BFF] rounded flex items-center justify-center">
-                        <span className="text-white font-bold text-xs">stripe</span>
-                      </div>
-                      <div>
-                        <p className="font-medium">Credit / Debit Card</p>
-                        <p className="text-sm text-muted-foreground">
-                          Visa, Mastercard, Amex & more
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-
-                  {/* PayPal Option */}
-                  <button
-                    onClick={() => setSelectedPayment('paypal')}
-                    disabled={!isLoggedIn && plan.price !== '$0'}
-                    className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
-                      selectedPayment === 'paypal'
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-muted-foreground/50'
-                    } ${!isLoggedIn && plan.price !== '$0' ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-8 bg-[#003087] rounded flex items-center justify-center">
-                        <span className="text-white font-bold text-xs">PayPal</span>
-                      </div>
-                      <div>
-                        <p className="font-medium">PayPal</p>
-                        <p className="text-sm text-muted-foreground">
-                          Pay with your PayPal account
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-                </div>
-
-                {/* Card Details (shown when Stripe is selected) */}
-                {selectedPayment === 'stripe' && (
-                  <div className="mb-6 p-4 border border-border rounded-lg bg-muted/30">
-                    <h3 className="text-sm font-medium mb-3">Card Details</h3>
+                    <h2 className="text-xl font-semibold mb-4">Select Payment Method</h2>
                     <div className="space-y-3">
-                      <div>
-                        <Label htmlFor="cardName" className="text-xs text-muted-foreground">Name on Card</Label>
-                        <Input
-                          id="cardName"
-                          placeholder="John Doe"
-                          value={cardName}
-                          onChange={(e) => setCardName(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="cardNumber" className="text-xs text-muted-foreground">Card Number</Label>
-                        <Input
-                          id="cardNumber"
-                          placeholder="1234 5678 9012 3456"
-                          value={cardNumber}
-                          onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
-                          maxLength={19}
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <Label htmlFor="expiry" className="text-xs text-muted-foreground">Expiry Date</Label>
-                          <Input
-                            id="expiry"
-                            placeholder="MM/YY"
-                            value={expiryDate}
-                            onChange={(e) => setExpiryDate(formatExpiryDate(e.target.value))}
-                            maxLength={5}
-                          />
+                      {/* Stripe Option */}
+                      <button
+                        onClick={() => handleSelectPayment('stripe')}
+                        disabled={!isLoggedIn && plan.price !== '$0'}
+                        className={`w-full p-4 rounded-lg border-2 transition-all text-left border-border hover:border-primary hover:bg-primary/5 ${
+                          !isLoggedIn && plan.price !== '$0' ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-8 bg-[#635BFF] rounded flex items-center justify-center">
+                              <span className="text-white font-bold text-xs">stripe</span>
+                            </div>
+                            <div>
+                              <p className="font-medium">Credit / Debit Card</p>
+                              <p className="text-sm text-muted-foreground">
+                                Visa, Mastercard, Amex & more
+                              </p>
+                            </div>
+                          </div>
+                          <ArrowLeft className="h-4 w-4 rotate-180 text-muted-foreground" />
                         </div>
-                        <div>
-                          <Label htmlFor="cvv" className="text-xs text-muted-foreground">CVV</Label>
-                          <Input
-                            id="cvv"
-                            placeholder="123"
-                            value={cvv}
-                            onChange={(e) => setCvv(e.target.value.replace(/\D/g, '').substring(0, 4))}
-                            maxLength={4}
-                            type="password"
-                          />
+                      </button>
+
+                      {/* PayPal Option */}
+                      <button
+                        onClick={() => handleSelectPayment('paypal')}
+                        disabled={!isLoggedIn && plan.price !== '$0'}
+                        className={`w-full p-4 rounded-lg border-2 transition-all text-left border-border hover:border-primary hover:bg-primary/5 ${
+                          !isLoggedIn && plan.price !== '$0' ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-8 bg-[#003087] rounded flex items-center justify-center">
+                              <span className="text-white font-bold text-xs">PayPal</span>
+                            </div>
+                            <div>
+                              <p className="font-medium">PayPal</p>
+                              <p className="text-sm text-muted-foreground">
+                                Pay with your PayPal account
+                              </p>
+                            </div>
+                          </div>
+                          <ArrowLeft className="h-4 w-4 rotate-180 text-muted-foreground" />
                         </div>
-                      </div>
+                      </button>
                     </div>
-                  </div>
+
+                    <div className="flex items-center justify-center gap-2 mt-6 text-sm text-muted-foreground">
+                      <Shield className="h-4 w-4" />
+                      <span>Secure payment powered by industry standards</span>
+                    </div>
+                  </motion.div>
                 )}
 
-                <Button
-                  className="w-full"
-                  size="lg"
-                  disabled={!selectedPayment || isProcessing || (!isLoggedIn && plan.price !== '$0')}
-                  onClick={handlePayment}
-                >
-                  {isProcessing ? (
-                    'Processing...'
-                  ) : plan.price === '$0' ? (
-                    'Start Free Plan'
-                  ) : (
-                    <>
-                      <CreditCard className="h-4 w-4 mr-2" />
-                      Start Free Trial
-                    </>
-                  )}
-                </Button>
+                {/* Step 2: Payment Details */}
+                {step === 'details' && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <div className="flex items-center gap-3 mb-6">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleBackToSelect}
+                        className="p-2 h-auto"
+                      >
+                        <ArrowLeft className="h-4 w-4" />
+                      </Button>
+                      <div className="flex items-center gap-2">
+                        {selectedPayment === 'stripe' ? (
+                          <div className="w-10 h-6 bg-[#635BFF] rounded flex items-center justify-center">
+                            <span className="text-white font-bold text-[10px]">stripe</span>
+                          </div>
+                        ) : (
+                          <div className="w-10 h-6 bg-[#003087] rounded flex items-center justify-center">
+                            <span className="text-white font-bold text-[10px]">PayPal</span>
+                          </div>
+                        )}
+                        <h2 className="text-lg font-semibold">
+                          {selectedPayment === 'stripe' ? 'Card Payment' : 'PayPal Payment'}
+                        </h2>
+                      </div>
+                    </div>
 
-                <div className="flex items-center justify-center gap-2 mt-4 text-sm text-muted-foreground">
-                  <Shield className="h-4 w-4" />
-                  <span>Secure payment powered by industry standards</span>
-                </div>
+                    {/* Billing Address Section */}
+                    <div className="mb-6">
+                      <h3 className="text-sm font-medium mb-3">Billing Address</h3>
+                      <div className="space-y-3">
+                        <div>
+                          <Label htmlFor="address" className="text-xs text-muted-foreground">Street Address</Label>
+                          <Input
+                            id="address"
+                            placeholder="123 Main Street"
+                            value={billingAddress}
+                            onChange={(e) => setBillingAddress(e.target.value)}
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label htmlFor="city" className="text-xs text-muted-foreground">City</Label>
+                            <Input
+                              id="city"
+                              placeholder="New York"
+                              value={city}
+                              onChange={(e) => setCity(e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="postal" className="text-xs text-muted-foreground">Postal Code</Label>
+                            <Input
+                              id="postal"
+                              placeholder="10001"
+                              value={postalCode}
+                              onChange={(e) => setPostalCode(e.target.value)}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor="country" className="text-xs text-muted-foreground">Country</Label>
+                          <Select value={country} onValueChange={setCountry}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select country" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {countries.map((c) => (
+                                <SelectItem key={c} value={c}>{c}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card Details (for Stripe) */}
+                    {selectedPayment === 'stripe' && (
+                      <div className="mb-6 p-4 border border-border rounded-lg bg-muted/30">
+                        <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
+                          <CreditCard className="h-4 w-4" />
+                          Card Details
+                        </h3>
+                        <div className="space-y-3">
+                          <div>
+                            <Label htmlFor="cardName" className="text-xs text-muted-foreground">Name on Card</Label>
+                            <Input
+                              id="cardName"
+                              placeholder="John Doe"
+                              value={cardName}
+                              onChange={(e) => setCardName(e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="cardNumber" className="text-xs text-muted-foreground">Card Number</Label>
+                            <Input
+                              id="cardNumber"
+                              placeholder="1234 5678 9012 3456"
+                              value={cardNumber}
+                              onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
+                              maxLength={19}
+                            />
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label htmlFor="expiry" className="text-xs text-muted-foreground">Expiry Date</Label>
+                              <Input
+                                id="expiry"
+                                placeholder="MM/YY"
+                                value={expiryDate}
+                                onChange={(e) => setExpiryDate(formatExpiryDate(e.target.value))}
+                                maxLength={5}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="cvv" className="text-xs text-muted-foreground">CVV</Label>
+                              <Input
+                                id="cvv"
+                                placeholder="123"
+                                value={cvv}
+                                onChange={(e) => setCvv(e.target.value.replace(/\D/g, '').substring(0, 4))}
+                                maxLength={4}
+                                type="password"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* PayPal Email (for PayPal) */}
+                    {selectedPayment === 'paypal' && (
+                      <div className="mb-6 p-4 border border-border rounded-lg bg-muted/30">
+                        <h3 className="text-sm font-medium mb-3">PayPal Account</h3>
+                        <div>
+                          <Label htmlFor="paypalEmail" className="text-xs text-muted-foreground">PayPal Email</Label>
+                          <Input
+                            id="paypalEmail"
+                            type="email"
+                            placeholder="your-email@example.com"
+                            value={paypalEmail}
+                            onChange={(e) => setPaypalEmail(e.target.value)}
+                          />
+                          <p className="text-xs text-muted-foreground mt-2">
+                            You'll be redirected to PayPal to complete payment
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    <Button
+                      className="w-full"
+                      size="lg"
+                      disabled={isProcessing}
+                      onClick={handlePayment}
+                    >
+                      {isProcessing ? (
+                        'Processing...'
+                      ) : plan.price === '$0' ? (
+                        'Start Free Plan'
+                      ) : (
+                        <>
+                          {selectedPayment === 'stripe' ? (
+                            <CreditCard className="h-4 w-4 mr-2" />
+                          ) : null}
+                          {selectedPayment === 'stripe' ? 'Pay with Card' : 'Continue to PayPal'}
+                        </>
+                      )}
+                    </Button>
+
+                    <div className="flex items-center justify-center gap-2 mt-4 text-sm text-muted-foreground">
+                      <Shield className="h-4 w-4" />
+                      <span>Secure payment powered by industry standards</span>
+                    </div>
+                  </motion.div>
+                )}
               </Card>
             </motion.div>
           </div>
