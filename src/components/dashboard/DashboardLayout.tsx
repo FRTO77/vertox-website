@@ -131,7 +131,7 @@ export function DashboardLayout({ children, hideSidebar = false }: DashboardLayo
 
         {/* Download Button */}
         <div className="p-4 border-t border-sidebar-border/50">
-          <a href="#download" target="_blank" rel="noopener noreferrer">
+          <Link to="/download">
             <Button 
               variant="glass" 
               className={cn(
@@ -142,7 +142,7 @@ export function DashboardLayout({ children, hideSidebar = false }: DashboardLayo
               <Download className="h-[18px] w-[18px] shrink-0" />
               {!collapsed && <span className="text-[14px]">Download</span>}
             </Button>
-          </a>
+          </Link>
         </div>
 
         {/* User Profile */}
@@ -186,13 +186,13 @@ export function DashboardLayout({ children, hideSidebar = false }: DashboardLayo
                   <Settings className="h-4 w-4 text-muted-foreground" />
                   Settings
                 </Link>
-                <a
-                  href="#support"
+                <Link
+                  to="/contact"
                   className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-secondary/60 transition-all duration-200 text-sm"
                 >
                   <HelpCircle className="h-4 w-4 text-muted-foreground" />
                   Support
-                </a>
+                </Link>
                 <div className="h-px bg-border/50 my-1" />
                 <button
                   onClick={handleSignOut}
