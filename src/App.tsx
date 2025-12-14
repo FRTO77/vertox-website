@@ -19,6 +19,10 @@ import SettingsPage from "./pages/SettingsPage";
 import AccountPage from "./pages/AccountPage";
 import PricingPage from "./pages/PricingPage";
 import CareersPage from "./pages/CareersPage";
+import CommunityPage from "./pages/CommunityPage";
+import APIPage from "./pages/solutions/APIPage";
+import OnlineMeetingsPage from "./pages/solutions/OnlineMeetingsPage";
+import PhysicalMeetingsPage from "./pages/solutions/PhysicalMeetingsPage";
 
 const queryClient = new QueryClient();
 
@@ -49,10 +53,14 @@ const App = () => {
             <Route path="/dashboard/settings" element={<SettingsPage />} />
             <Route path="/dashboard/account" element={<AccountPage />} />
 
-            {/* Placeholder routes */}
-            <Route path="/solutions/*" element={<NotFound />} />
+            {/* Solutions routes */}
+            <Route path="/solutions/api" element={<APIPage />} />
+            <Route path="/solutions/online-meetings" element={<OnlineMeetingsPage />} />
+            <Route path="/solutions/physical-meetings" element={<PhysicalMeetingsPage />} />
+            
+            {/* Other pages */}
             <Route path="/careers" element={<CareersPage />} />
-            <Route path="/community" element={<NotFound />} />
+            <Route path="/community" element={<CommunityPage />} />
             <Route path="/terms" element={<NotFound />} />
             <Route path="/privacy" element={<NotFound />} />
             <Route path="/cookies" element={<NotFound />} />
