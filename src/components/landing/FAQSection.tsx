@@ -51,19 +51,19 @@ const faqs = [
 
 export function FAQSection() {
   return (
-    <section className="py-24 bg-background" id="faq">
-      <div className="container mx-auto px-4">
+    <section className="py-28 md:py-36 bg-background" id="faq">
+      <div className="container mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16"
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="text-center mb-14"
         >
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-5">
             Frequently Asked Questions
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-muted-foreground/90 max-w-2xl mx-auto text-lg">
             Everything you need to know about VertoX
           </p>
         </motion.div>
