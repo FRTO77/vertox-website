@@ -162,6 +162,180 @@
     animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
+  /* Premium SaaS Background */
+  .premium-bg {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(
+      180deg,
+      hsl(222 55% 4%) 0%,
+      hsl(222 50% 7%) 25%,
+      hsl(220 48% 10%) 50%,
+      hsl(218 45% 8%) 75%,
+      hsl(222 50% 6%) 100%
+    );
+  }
+
+  .premium-bg::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      /* Primary glow - top center */
+      radial-gradient(ellipse 100% 60% at 50% -10%, hsl(217 91% 55% / 0.12), transparent 60%),
+      /* Secondary glow - right */
+      radial-gradient(ellipse 50% 80% at 90% 20%, hsl(217 91% 50% / 0.08), transparent 50%),
+      /* Accent glow - left bottom */
+      radial-gradient(ellipse 60% 50% at 10% 80%, hsl(200 80% 45% / 0.06), transparent 50%),
+      /* Subtle center glow */
+      radial-gradient(ellipse 80% 40% at 50% 50%, hsl(220 60% 20% / 0.15), transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Animated flowing gradient orbs */
+  .premium-bg::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(circle 600px at var(--orb1-x, 30%) var(--orb1-y, 20%), hsl(217 91% 50% / 0.05), transparent 50%),
+      radial-gradient(circle 500px at var(--orb2-x, 70%) var(--orb2-y, 60%), hsl(200 80% 50% / 0.04), transparent 50%),
+      radial-gradient(circle 400px at var(--orb3-x, 50%) var(--orb3-y, 80%), hsl(217 91% 55% / 0.03), transparent 50%);
+    animation: orbFloat 20s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Noise texture overlay */
+  .noise-overlay {
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.025;
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: overlay;
+  }
+
+  /* Subtle animated wave lines */
+  .wave-lines {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  .wave-lines::before,
+  .wave-lines::after {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent 0,
+      transparent 49.5%,
+      hsl(217 91% 50% / 0.015) 49.5%,
+      hsl(217 91% 50% / 0.015) 50.5%,
+      transparent 50.5%,
+      transparent 100%
+    );
+    background-size: 120px 120px;
+    animation: waveMove 30s linear infinite;
+  }
+
+  .wave-lines::after {
+    background: repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 49.5%,
+      hsl(217 91% 50% / 0.01) 49.5%,
+      hsl(217 91% 50% / 0.01) 50.5%,
+      transparent 50.5%,
+      transparent 100%
+    );
+    background-size: 120px 120px;
+    animation: waveMove 25s linear infinite reverse;
+  }
+
+  /* Flowing light beam */
+  .light-beam {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    width: 1px;
+    height: 100vh;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      hsl(217 91% 60% / 0.1) 20%,
+      hsl(217 91% 60% / 0.05) 50%,
+      transparent 100%
+    );
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .light-beam::before,
+  .light-beam::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 1px;
+    height: 100%;
+    background: inherit;
+  }
+
+  .light-beam::before {
+    left: -200px;
+    opacity: 0.5;
+  }
+
+  .light-beam::after {
+    left: 200px;
+    opacity: 0.5;
+  }
+
+  /* Sound wave animation */
+  .sound-wave {
+    position: fixed;
+    bottom: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    opacity: 0.08;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .sound-wave span {
+    width: 2px;
+    height: 20px;
+    background: linear-gradient(180deg, hsl(217 91% 60%), hsl(200 80% 50%));
+    border-radius: 2px;
+    animation: soundWave 1.5s ease-in-out infinite;
+  }
+
+  .sound-wave span:nth-child(1) { animation-delay: 0s; height: 15px; }
+  .sound-wave span:nth-child(2) { animation-delay: 0.1s; height: 25px; }
+  .sound-wave span:nth-child(3) { animation-delay: 0.2s; height: 35px; }
+  .sound-wave span:nth-child(4) { animation-delay: 0.3s; height: 45px; }
+  .sound-wave span:nth-child(5) { animation-delay: 0.4s; height: 40px; }
+  .sound-wave span:nth-child(6) { animation-delay: 0.5s; height: 30px; }
+  .sound-wave span:nth-child(7) { animation-delay: 0.6s; height: 20px; }
+  .sound-wave span:nth-child(8) { animation-delay: 0.7s; height: 35px; }
+  .sound-wave span:nth-child(9) { animation-delay: 0.8s; height: 45px; }
+  .sound-wave span:nth-child(10) { animation-delay: 0.9s; height: 25px; }
+  .sound-wave span:nth-child(11) { animation-delay: 1s; height: 15px; }
+
   .grain {
     position: relative;
   }
@@ -194,5 +368,60 @@
   }
   50% {
     transform: translateY(-10px);
+  }
+}
+
+@keyframes orbFloat {
+  0%, 100% {
+    --orb1-x: 30%;
+    --orb1-y: 20%;
+    --orb2-x: 70%;
+    --orb2-y: 60%;
+    --orb3-x: 50%;
+    --orb3-y: 80%;
+  }
+  25% {
+    --orb1-x: 40%;
+    --orb1-y: 30%;
+    --orb2-x: 60%;
+    --orb2-y: 50%;
+    --orb3-x: 45%;
+    --orb3-y: 70%;
+  }
+  50% {
+    --orb1-x: 35%;
+    --orb1-y: 25%;
+    --orb2-x: 75%;
+    --orb2-y: 55%;
+    --orb3-x: 55%;
+    --orb3-y: 75%;
+  }
+  75% {
+    --orb1-x: 25%;
+    --orb1-y: 15%;
+    --orb2-x: 65%;
+    --orb2-y: 65%;
+    --orb3-x: 48%;
+    --orb3-y: 85%;
+  }
+}
+
+@keyframes waveMove {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes soundWave {
+  0%, 100% {
+    transform: scaleY(0.5);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
   }
 }
