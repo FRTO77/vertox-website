@@ -18,6 +18,7 @@ import VoicePage from "./pages/VoicePage";
 import SettingsPage from "./pages/SettingsPage";
 import AccountPage from "./pages/AccountPage";
 import PricingPage from "./pages/PricingPage";
+import CareersPage from "./pages/CareersPage";
 
 const queryClient = new QueryClient();
 
@@ -50,7 +51,7 @@ const App = () => {
 
             {/* Placeholder routes */}
             <Route path="/solutions/*" element={<NotFound />} />
-            <Route path="/careers" element={<NotFound />} />
+            <Route path="/careers" element={<CareersPage />} />
             <Route path="/community" element={<NotFound />} />
             <Route path="/terms" element={<NotFound />} />
             <Route path="/privacy" element={<NotFound />} />
