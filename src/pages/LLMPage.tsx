@@ -221,27 +221,33 @@ export default function LLMPage() {
         {/* Main Chat Area */}
         <div className="flex-1 flex flex-col h-full">
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto p-6">
             <div className="max-w-2xl mx-auto">
               {currentChat?.messages.length === 0 ? (
                 <div className="h-full flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <motion.div 
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                    className="text-center"
+                  >
+                    <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
                       <Bot className="h-8 w-8 text-primary" />
                     </div>
-                    <h2 className="text-xl font-semibold mb-2">VertoX LLM</h2>
-                    <p className="text-muted-foreground text-sm max-w-sm">
+                    <h2 className="text-xl font-semibold tracking-tight mb-2">VertoX LLM</h2>
+                    <p className="text-muted-foreground/90 text-sm max-w-sm leading-relaxed">
                       Start a conversation. I can help with translations, writing, and more.
                     </p>
-                  </div>
+                  </motion.div>
                 </div>
               ) : (
-                <div className="space-y-4 py-4">
+                <div className="space-y-5 py-6">
                   {currentChat?.messages.map((message) => (
                     <motion.div
                       key={message.id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                       className={cn(
                         'flex gap-3',
                         message.role === 'user' ? 'justify-end' : 'justify-start'
@@ -249,10 +255,10 @@ export default function LLMPage() {
                     >
                       <div
                         className={cn(
-                          'max-w-[80%] rounded-2xl px-4 py-3 text-sm',
+                          'max-w-[80%] rounded-2xl px-4 py-3 text-[14px] leading-relaxed',
                           message.role === 'user'
                             ? 'bg-primary text-primary-foreground'
-                            : 'bg-secondary text-secondary-foreground'
+                            : 'bg-secondary/80 text-secondary-foreground'
                         )}
                       >
                         {/* Attachments */}
@@ -274,11 +280,14 @@ export default function LLMPage() {
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
                       className="flex gap-3 justify-start"
                     >
-                      <div className="bg-secondary text-secondary-foreground rounded-2xl px-4 py-3 text-sm flex items-center gap-2">
+                      <div className="bg-secondary/80 text-secondary-foreground rounded-2xl px-4 py-3 text-[14px] flex items-center gap-2.5">
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        {deepThink ? 'Deep thinking...' : webSearch ? 'Searching the web...' : 'Thinking...'}
+                        <span className="text-muted-foreground">
+                          {deepThink ? 'Deep thinking...' : webSearch ? 'Searching the web...' : 'Thinking...'}
+                        </span>
                       </div>
                     </motion.div>
                   )}
@@ -289,7 +298,7 @@ export default function LLMPage() {
           </div>
 
           {/* Input Area */}
-          <div className="border-t border-border p-4">
+          <div className="border-t border-border/50 p-5">
             <div className="max-w-2xl mx-auto">
               {/* Attachments Preview */}
               {attachments.length > 0 && (
