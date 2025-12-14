@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { signUp, setCurrentUser } from '@/lib/auth';
+import { signUp, setCurrentUser, getUsers } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Eye, EyeOff, Check, Phone, ArrowRight } from 'lucide-react';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
@@ -67,6 +67,21 @@ export default function SignUp() {
     if (!passwordRequirements.every(req => req.met)) {
       toast({
         title: 'Password requirements not met',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Check if nickname is already taken BEFORE moving to phone step
+    const users = getUsers();
+    const nicknameExists = Object.values(users).some(
+      u => u.user.nickname.toLowerCase() === nickname.toLowerCase()
+    );
+    
+    if (nicknameExists) {
+      toast({
+        title: 'Nickname already taken',
+        description: 'Please choose a different nickname',
         variant: 'destructive',
       });
       return;
