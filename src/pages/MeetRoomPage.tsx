@@ -55,6 +55,14 @@ interface ChatMessage {
   timestamp: Date;
 }
 
+interface TranscriptEntry {
+  id: string;
+  speaker: string;
+  text: string;
+  timestamp: Date;
+  language: string;
+}
+
 const languages = [
   { code: 'en', name: 'English' },
   { code: 'es', name: 'Spanish' },
@@ -93,6 +101,11 @@ export default function MeetRoomPage() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     { id: '1', sender: 'System', content: 'Meeting started. Translation is active.', timestamp: new Date() },
   ]);
+
+  // Live Transcription
+  const [isTranscriptPanelOpen, setIsTranscriptPanelOpen] = useState(false);
+  const [transcriptEntries, setTranscriptEntries] = useState<TranscriptEntry[]>([]);
+  const transcriptIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Participants (mock data)
   const [participants] = useState<Participant[]>([
@@ -174,11 +187,55 @@ export default function MeetRoomPage() {
   };
 
   const handleTranscript = () => {
-    setIsTranscribing(!isTranscribing);
+    const newState = !isTranscribing;
+    setIsTranscribing(newState);
+    if (newState) {
+      setIsTranscriptPanelOpen(true);
+      // Simulate live transcription with mock data
+      const mockPhrases = [
+        { speaker: 'You', text: 'Hello everyone, thanks for joining today.' },
+        { speaker: 'John Doe', text: 'Hi! Great to be here.' },
+        { speaker: 'Jane Smith', text: 'Looking forward to the discussion.' },
+        { speaker: 'You', text: 'Let me share my screen and we can get started.' },
+        { speaker: 'John Doe', text: 'Sounds good, I can see it now.' },
+        { speaker: 'Jane Smith', text: 'The quality looks great.' },
+        { speaker: 'You', text: 'Perfect, so first on the agenda...' },
+        { speaker: 'John Doe', text: 'I have a question about that point.' },
+      ];
+      let index = 0;
+      transcriptIntervalRef.current = setInterval(() => {
+        if (index < mockPhrases.length) {
+          const phrase = mockPhrases[index];
+          setTranscriptEntries(prev => [...prev, {
+            id: crypto.randomUUID(),
+            speaker: phrase.speaker,
+            text: phrase.text,
+            timestamp: new Date(),
+            language: myLanguage,
+          }]);
+          index++;
+        }
+      }, 3000);
+    } else {
+      if (transcriptIntervalRef.current) {
+        clearInterval(transcriptIntervalRef.current);
+        transcriptIntervalRef.current = null;
+      }
+      setIsTranscriptPanelOpen(false);
+    }
     toast({ 
-      title: isTranscribing ? 'Live transcript stopped' : 'Live transcript started'
+      title: newState ? 'Live transcript started' : 'Live transcript stopped'
     });
   };
+
+  // Cleanup transcript interval on unmount
+  useEffect(() => {
+    return () => {
+      if (transcriptIntervalRef.current) {
+        clearInterval(transcriptIntervalRef.current);
+      }
+    };
+  }, []);
 
   const sendChatMessage = () => {
     if (!chatInput.trim()) return;
@@ -435,6 +492,73 @@ export default function MeetRoomPage() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Live Transcription Panel */}
+          <AnimatePresence>
+            {isTranscriptPanelOpen && (
+              <motion.div
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: 360, opacity: 1 }}
+                exit={{ width: 0, opacity: 0 }}
+                className="border-l border-border flex flex-col bg-card"
+              >
+                <div className="p-4 border-b border-border flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold">Live Transcription</h3>
+                    {isTranscribing && (
+                      <span className="flex items-center gap-1 text-xs text-primary">
+                        <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                        Live
+                      </span>
+                    )}
+                  </div>
+                  <button onClick={() => setIsTranscriptPanelOpen(false)} className="p-1 hover:bg-secondary rounded">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  {transcriptEntries.length === 0 ? (
+                    <div className="text-center text-muted-foreground text-sm py-8">
+                      <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                      <p>Waiting for speech...</p>
+                      <p className="text-xs mt-1">Transcription will appear here in real-time</p>
+                    </div>
+                  ) : (
+                    transcriptEntries.map((entry, index) => (
+                      <motion.div
+                        key={entry.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="space-y-1"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">
+                            {entry.speaker.charAt(0)}
+                          </div>
+                          <span className="font-medium text-sm">{entry.speaker}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {entry.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                          </span>
+                        </div>
+                        <p className="text-sm text-foreground/90 pl-8">{entry.text}</p>
+                      </motion.div>
+                    ))
+                  )}
+                </div>
+                <div className="p-3 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
+                  <span>Language: {languages.find(l => l.code === myLanguage)?.name}</span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setTranscriptEntries([])}
+                    className="h-7 text-xs"
+                  >
+                    Clear
+                  </Button>
                 </div>
               </motion.div>
             )}
