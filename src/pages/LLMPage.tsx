@@ -298,8 +298,8 @@ export default function LLMPage() {
           </div>
 
           {/* Input Area */}
-          <div className="border-t border-border/50 p-5">
-            <div className="max-w-2xl mx-auto">
+          <div className="p-4">
+            <div className="max-w-3xl mx-auto">
               {/* Attachments Preview */}
               {attachments.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-3">
@@ -316,100 +316,128 @@ export default function LLMPage() {
                 </div>
               )}
 
-              {/* Mode Toggles */}
-              <div className="flex items-center gap-2 mb-3">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant={deepThink ? 'default' : 'ghost'}
-                      size="sm"
-                      onClick={() => setDeepThink(!deepThink)}
-                      className={cn('gap-1.5 text-xs', deepThink && 'bg-primary/20 text-primary hover:bg-primary/30')}
-                    >
-                      <Brain className="w-4 h-4" />
-                      Deep Think
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Extended reasoning for complex questions</TooltipContent>
-                </Tooltip>
+              {/* Main Input Bar */}
+              <div className="relative">
+                {/* Gradient top border */}
+                <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 rounded-t-2xl" />
+                
+                <div className="flex items-center gap-2 bg-card border border-border rounded-2xl px-3 py-2.5 shadow-sm">
+                  {/* Left actions */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 shrink-0 rounded-lg"
+                        onClick={handleNewChat}
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>New chat</TooltipContent>
+                  </Tooltip>
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant={webSearch ? 'default' : 'ghost'}
-                      size="sm"
-                      onClick={() => setWebSearch(!webSearch)}
-                      className={cn('gap-1.5 text-xs', webSearch && 'bg-primary/20 text-primary hover:bg-primary/30')}
-                    >
-                      <Globe className="w-4 h-4" />
-                      Web Search
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Search the internet for latest information</TooltipContent>
-                </Tooltip>
-              </div>
+                  {/* File Upload */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    className="hidden"
+                    onChange={handleFileSelect}
+                    accept="image/*,.pdf,.doc,.docx,.txt,.csv,.json"
+                  />
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 gap-1.5 rounded-lg text-muted-foreground hover:text-foreground"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <Paperclip className="h-4 w-4" />
+                        <span className="text-xs font-medium">Attach</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Attach files</TooltipContent>
+                  </Tooltip>
 
-              {/* Input Row */}
-              <div className="flex gap-2 items-end">
-                {/* File Upload */}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  className="hidden"
-                  onChange={handleFileSelect}
-                  accept="image/*,.pdf,.doc,.docx,.txt,.csv,.json"
-                />
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-10 w-10 shrink-0"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <Paperclip className="h-5 w-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Attach files</TooltipContent>
-                </Tooltip>
+                  {/* Theme/Mode Toggle */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant={deepThink ? 'secondary' : 'ghost'}
+                        size="sm"
+                        onClick={() => setDeepThink(!deepThink)}
+                        className={cn(
+                          'h-8 gap-1.5 rounded-lg text-muted-foreground hover:text-foreground',
+                          deepThink && 'bg-secondary text-foreground'
+                        )}
+                      >
+                        <Brain className="h-4 w-4" />
+                        <span className="text-xs font-medium">Theme</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Deep thinking mode</TooltipContent>
+                  </Tooltip>
 
-                {/* Voice */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant={isRecording ? 'destructive' : 'ghost'}
-                      size="icon"
-                      className={cn('h-10 w-10 shrink-0', isRecording && 'animate-pulse')}
-                      onClick={handleVoiceToggle}
-                    >
-                      {isRecording ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>{isRecording ? 'Stop recording' : 'Voice input'}</TooltipContent>
-                </Tooltip>
+                  {/* Text Input */}
+                  <div className="flex-1 mx-2">
+                    <Textarea
+                      ref={textareaRef}
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Ask VertoX LLM..."
+                      className="min-h-[32px] max-h-[120px] resize-none bg-transparent border-0 py-1.5 px-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-sm placeholder:text-muted-foreground/60"
+                      rows={1}
+                    />
+                  </div>
 
-                {/* Text Input */}
-                <Textarea
-                  ref={textareaRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Type a message..."
-                  className="flex-1 min-h-[44px] max-h-[150px] resize-none bg-secondary/50 border-border rounded-xl py-3"
-                  rows={1}
-                />
+                  {/* Right actions */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant={webSearch ? 'secondary' : 'ghost'}
+                        size="sm"
+                        onClick={() => setWebSearch(!webSearch)}
+                        className={cn(
+                          'h-8 gap-1.5 rounded-lg text-muted-foreground hover:text-foreground',
+                          webSearch && 'bg-secondary text-foreground'
+                        )}
+                      >
+                        <Globe className="h-4 w-4" />
+                        <span className="text-xs font-medium">Chat</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Web search</TooltipContent>
+                  </Tooltip>
 
-                {/* Send */}
-                <Button 
-                  type="button" 
-                  size="icon" 
-                  className="h-10 w-10 shrink-0" 
-                  disabled={(!input.trim() && attachments.length === 0) || isLoading}
-                  onClick={handleSend}
-                >
-                  {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-                </Button>
+                  {/* Voice */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant={isRecording ? 'destructive' : 'ghost'}
+                        size="icon"
+                        className={cn('h-8 w-8 shrink-0 rounded-lg', isRecording && 'animate-pulse')}
+                        onClick={handleVoiceToggle}
+                      >
+                        {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{isRecording ? 'Stop recording' : 'Voice input'}</TooltipContent>
+                  </Tooltip>
+
+                  {/* Send */}
+                  <Button 
+                    type="button" 
+                    size="icon" 
+                    className="h-8 w-8 shrink-0 rounded-full bg-primary hover:bg-primary/90" 
+                    disabled={(!input.trim() && attachments.length === 0) || isLoading}
+                    onClick={handleSend}
+                  >
+                    {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
