@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { 
   Send, 
   Plus, 
@@ -11,15 +10,41 @@ import {
   Share2, 
   X,
   FileText,
-  Bot
+  Bot,
+  Mic,
+  MicOff,
+  Paperclip,
+  Brain,
+  Globe,
+  Loader2,
+  Image,
+  File,
+  XCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+
+interface Attachment {
+  id: string;
+  name: string;
+  type: 'image' | 'file';
+  size: string;
+}
 
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  attachments?: Attachment[];
+  isThinking?: boolean;
+  isSearching?: boolean;
 }
 
 interface Chat {
@@ -30,6 +55,7 @@ interface Chat {
 }
 
 export default function LLMPage() {
+  const { toast } = useToast();
   const [chats, setChats] = useState<Chat[]>([
     {
       id: '1',
@@ -41,7 +67,14 @@ export default function LLMPage() {
   const [activeChat, setActiveChat] = useState<string>('1');
   const [input, setInput] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [deepThink, setDeepThink] = useState(false);
+  const [webSearch, setWebSearch] = useState(false);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const currentChat = chats.find((c) => c.id === activeChat);
 
@@ -53,32 +86,62 @@ export default function LLMPage() {
     scrollToBottom();
   }, [currentChat?.messages]);
 
-  const handleSend = () => {
-    if (!input.trim() || !currentChat) return;
+  // Auto-resize textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 150) + 'px';
+    }
+  }, [input]);
+
+  const handleSend = async () => {
+    if ((!input.trim() && attachments.length === 0) || !currentChat || isLoading) return;
 
     const userMessage: Message = {
       id: crypto.randomUUID(),
       role: 'user',
       content: input.trim(),
       timestamp: new Date(),
-    };
-
-    // Simulate AI response
-    const aiResponse: Message = {
-      id: crypto.randomUUID(),
-      role: 'assistant',
-      content: `This is a simulated response to: "${input.trim()}". In a real implementation, this would be connected to an AI backend.`,
-      timestamp: new Date(),
+      attachments: attachments.length > 0 ? [...attachments] : undefined,
     };
 
     setChats((prev) =>
       prev.map((chat) =>
         chat.id === activeChat
-          ? { ...chat, messages: [...chat.messages, userMessage, aiResponse] }
+          ? { ...chat, messages: [...chat.messages, userMessage] }
           : chat
       )
     );
     setInput('');
+    setAttachments([]);
+    setIsLoading(true);
+
+    // Simulate AI thinking/searching
+    await new Promise(resolve => setTimeout(resolve, deepThink ? 3000 : webSearch ? 2000 : 1000));
+
+    const responsePrefix = deepThink 
+      ? '🧠 **Deep Analysis:**\n\n' 
+      : webSearch 
+        ? '🌐 **Web Search Results:**\n\n' 
+        : '';
+
+    const aiResponse: Message = {
+      id: crypto.randomUUID(),
+      role: 'assistant',
+      content: `${responsePrefix}This is a simulated response to: "${input.trim()}".${deepThink ? ' I performed deep reasoning analysis on your query.' : ''}${webSearch ? ' I searched the web for the latest information.' : ''}${attachments.length > 0 ? ` I also analyzed ${attachments.length} attached file(s).` : ''} In production, this would connect to a real AI backend.`,
+      timestamp: new Date(),
+      isThinking: deepThink,
+      isSearching: webSearch,
+    };
+
+    setChats((prev) =>
+      prev.map((chat) =>
+        chat.id === activeChat
+          ? { ...chat, messages: [...chat.messages, aiResponse] }
+          : chat
+      )
+    );
+    setIsLoading(false);
   };
 
   const handleNewChat = () => {
@@ -96,6 +159,59 @@ export default function LLMPage() {
     setChats((prev) => prev.filter((c) => c.id !== chatId));
     if (activeChat === chatId) {
       setActiveChat(chats[0]?.id || '');
+    }
+  };
+
+  const handleVoiceToggle = async () => {
+    if (isRecording) {
+      setIsRecording(false);
+      toast({ title: 'Voice recording stopped' });
+      // Simulate transcription
+      setInput(prev => prev + ' [Voice transcription would appear here]');
+    } else {
+      try {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        setIsRecording(true);
+        toast({ title: 'Recording...', description: 'Speak now' });
+      } catch {
+        toast({ 
+          title: 'Microphone access denied', 
+          description: 'Please enable microphone permissions',
+          variant: 'destructive' 
+        });
+      }
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const newAttachments: Attachment[] = Array.from(files).map(file => ({
+      id: crypto.randomUUID(),
+      name: file.name,
+      type: file.type.startsWith('image/') ? 'image' : 'file',
+      size: formatFileSize(file.size),
+    }));
+
+    setAttachments(prev => [...prev, ...newAttachments]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  };
+
+  const removeAttachment = (id: string) => {
+    setAttachments(prev => prev.filter(a => a.id !== id));
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
     }
   };
 
@@ -139,10 +255,33 @@ export default function LLMPage() {
                             : 'bg-secondary text-secondary-foreground'
                         )}
                       >
-                        {message.content}
+                        {/* Attachments */}
+                        {message.attachments && message.attachments.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            {message.attachments.map(att => (
+                              <div key={att.id} className="flex items-center gap-1.5 bg-background/20 rounded-lg px-2 py-1 text-xs">
+                                {att.type === 'image' ? <Image className="w-3 h-3" /> : <File className="w-3 h-3" />}
+                                <span className="truncate max-w-[100px]">{att.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <div className="whitespace-pre-wrap">{message.content}</div>
                       </div>
                     </motion.div>
                   ))}
+                  {isLoading && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex gap-3 justify-start"
+                    >
+                      <div className="bg-secondary text-secondary-foreground rounded-2xl px-4 py-3 text-sm flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        {deepThink ? 'Deep thinking...' : webSearch ? 'Searching the web...' : 'Thinking...'}
+                      </div>
+                    </motion.div>
+                  )}
                   <div ref={messagesEndRef} />
                 </div>
               )}
@@ -152,23 +291,117 @@ export default function LLMPage() {
           {/* Input Area */}
           <div className="border-t border-border p-4">
             <div className="max-w-2xl mx-auto">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSend();
-                }}
-                className="flex gap-3"
-              >
-                <Input
+              {/* Attachments Preview */}
+              {attachments.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {attachments.map(att => (
+                    <div key={att.id} className="flex items-center gap-2 bg-secondary/50 rounded-lg px-3 py-1.5 text-sm">
+                      {att.type === 'image' ? <Image className="w-4 h-4 text-primary" /> : <File className="w-4 h-4 text-primary" />}
+                      <span className="truncate max-w-[150px]">{att.name}</span>
+                      <span className="text-xs text-muted-foreground">{att.size}</span>
+                      <button onClick={() => removeAttachment(att.id)} className="text-muted-foreground hover:text-destructive">
+                        <XCircle className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Mode Toggles */}
+              <div className="flex items-center gap-2 mb-3">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={deepThink ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setDeepThink(!deepThink)}
+                      className={cn('gap-1.5 text-xs', deepThink && 'bg-primary/20 text-primary hover:bg-primary/30')}
+                    >
+                      <Brain className="w-4 h-4" />
+                      Deep Think
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Extended reasoning for complex questions</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={webSearch ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setWebSearch(!webSearch)}
+                      className={cn('gap-1.5 text-xs', webSearch && 'bg-primary/20 text-primary hover:bg-primary/30')}
+                    >
+                      <Globe className="w-4 h-4" />
+                      Web Search
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Search the internet for latest information</TooltipContent>
+                </Tooltip>
+              </div>
+
+              {/* Input Row */}
+              <div className="flex gap-2 items-end">
+                {/* File Upload */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileSelect}
+                  accept="image/*,.pdf,.doc,.docx,.txt,.csv,.json"
+                />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-10 w-10 shrink-0"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Paperclip className="h-5 w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Attach files</TooltipContent>
+                </Tooltip>
+
+                {/* Voice */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={isRecording ? 'destructive' : 'ghost'}
+                      size="icon"
+                      className={cn('h-10 w-10 shrink-0', isRecording && 'animate-pulse')}
+                      onClick={handleVoiceToggle}
+                    >
+                      {isRecording ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{isRecording ? 'Stop recording' : 'Voice input'}</TooltipContent>
+                </Tooltip>
+
+                {/* Text Input */}
+                <Textarea
+                  ref={textareaRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
                   placeholder="Type a message..."
-                  className="flex-1 h-12 bg-secondary/50 border-border"
+                  className="flex-1 min-h-[44px] max-h-[150px] resize-none bg-secondary/50 border-border rounded-xl py-3"
+                  rows={1}
                 />
-                <Button type="submit" size="icon" className="h-12 w-12" disabled={!input.trim()}>
-                  <Send className="h-5 w-5" />
+
+                {/* Send */}
+                <Button 
+                  type="button" 
+                  size="icon" 
+                  className="h-10 w-10 shrink-0" 
+                  disabled={(!input.trim() && attachments.length === 0) || isLoading}
+                  onClick={handleSend}
+                >
+                  {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
                 </Button>
-              </form>
+              </div>
             </div>
           </div>
         </div>

@@ -31,9 +31,10 @@ const navItems = [
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
+  hideSidebar?: boolean;
 }
 
-export function DashboardLayout({ children }: DashboardLayoutProps) {
+export function DashboardLayout({ children, hideSidebar = false }: DashboardLayoutProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [user, setUser] = useState<UserType | null>(null);
   const location = useLocation();
@@ -58,6 +59,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   if (!user) return null;
+
+  if (hideSidebar) {
+    return <div className="min-h-screen bg-background w-full">{children}</div>;
+  }
 
   return (
     <div className="min-h-screen bg-background flex w-full">
