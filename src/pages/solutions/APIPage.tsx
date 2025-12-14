@@ -1,8 +1,17 @@
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { ArrowLeft, Code, Zap, Shield, Globe, Terminal, Copy, Check } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, Code, Zap, Shield, Globe, Terminal, Copy, Check, Key, Eye, EyeOff, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getCurrentUser } from "@/lib/auth";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const features = [
   {
@@ -51,8 +60,84 @@ const result = await client.translate({
 console.log(result.translation);
 // "Hola, ¿cómo estás?"`;
 
+// Generate a mock API key
+const generateApiKey = () => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let key = 'vtx_';
+  for (let i = 0; i < 32; i++) {
+    key += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return key;
+};
+
 const APIPage = () => {
   const [copied, setCopied] = useState(false);
+  const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false);
+  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [showKey, setShowKey] = useState(false);
+  const [keyCopied, setKeyCopied] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  // Load or generate API key from localStorage
+  useEffect(() => {
+    const user = getCurrentUser();
+    if (user) {
+      const storedKey = localStorage.getItem(`vertox_api_key_${user.id}`);
+      if (storedKey) {
+        setApiKey(storedKey);
+      }
+    }
+  }, [apiKeyModalOpen]);
+
+  const handleGetApiKey = () => {
+    const user = getCurrentUser();
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to get your API key",
+        variant: "destructive",
+      });
+      navigate('/signin');
+      return;
+    }
+    setApiKeyModalOpen(true);
+  };
+
+  const handleGenerateKey = () => {
+    const user = getCurrentUser();
+    if (!user) return;
+    
+    const newKey = generateApiKey();
+    setApiKey(newKey);
+    localStorage.setItem(`vertox_api_key_${user.id}`, newKey);
+    toast({
+      title: "API key generated",
+      description: "Your new API key has been created",
+    });
+  };
+
+  const handleRegenerateKey = () => {
+    const user = getCurrentUser();
+    if (!user) return;
+    
+    const newKey = generateApiKey();
+    setApiKey(newKey);
+    localStorage.setItem(`vertox_api_key_${user.id}`, newKey);
+    toast({
+      title: "API key regenerated",
+      description: "Your old API key is no longer valid",
+    });
+  };
+
+  const copyApiKey = () => {
+    if (apiKey) {
+      navigator.clipboard.writeText(apiKey);
+      setKeyCopied(true);
+      toast({ title: "API key copied to clipboard" });
+      setTimeout(() => setKeyCopied(false), 2000);
+    }
+  };
 
   const copyCode = () => {
     navigator.clipboard.writeText(codeExample);
@@ -96,10 +181,10 @@ const APIPage = () => {
               developer-friendly APIs. Start building in minutes.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button variant="hero" size="lg">
+              <Button variant="hero" size="lg" onClick={handleGetApiKey}>
                 Get API Key
               </Button>
-              <Button variant="heroOutline" size="lg">
+              <Button variant="heroOutline" size="lg" onClick={() => navigate('/docs')}>
                 View Documentation
               </Button>
             </div>
@@ -223,11 +308,76 @@ const APIPage = () => {
           <p className="text-muted-foreground mb-6">
             Free tier includes 10,000 characters per month. No credit card required.
           </p>
-          <Button variant="hero" size="lg">
+          <Button variant="hero" size="lg" onClick={handleGetApiKey}>
             Get Your API Key
           </Button>
         </motion.div>
       </section>
+
+      {/* API Key Modal */}
+      <Dialog open={apiKeyModalOpen} onOpenChange={setApiKeyModalOpen}>
+        <DialogContent className="sm:max-w-md bg-card border-border">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Key className="w-5 h-5 text-primary" />
+              Your API Key
+            </DialogTitle>
+            <DialogDescription>
+              Use this key to authenticate your API requests. Keep it secret!
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            {apiKey ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 p-3 bg-secondary/50 rounded-lg font-mono text-sm overflow-hidden">
+                    {showKey ? apiKey : '•'.repeat(apiKey.length)}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowKey(!showKey)}
+                  >
+                    {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={copyApiKey}
+                  >
+                    {keyCopied ? <Check className="w-4 h-4 text-accent" /> : <Copy className="w-4 h-4" />}
+                  </Button>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button
+                    variant="heroOutline"
+                    className="flex-1"
+                    onClick={handleRegenerateKey}
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Regenerate Key
+                  </Button>
+                </div>
+                
+                <p className="text-xs text-muted-foreground">
+                  Warning: Regenerating your key will invalidate the current one.
+                </p>
+              </>
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-muted-foreground mb-4">
+                  You don't have an API key yet. Generate one to get started.
+                </p>
+                <Button variant="hero" onClick={handleGenerateKey}>
+                  Generate API Key
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Footer */}
       <footer className="py-8 px-6 border-t border-border/50">
