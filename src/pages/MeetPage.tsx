@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,7 @@ export default function MeetPage() {
   const [meetingLink, setMeetingLink] = useState('');
   const [generatedLink, setGeneratedLink] = useState('');
   const [copied, setCopied] = useState(false);
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   const generateMeetingLink = () => {
@@ -36,8 +38,7 @@ export default function MeetPage() {
       toast({ title: 'Please enter a meeting link', variant: 'destructive' });
       return;
     }
-    // Navigate to pre-join screen
-    window.location.href = `/dashboard/meet/join?link=${encodeURIComponent(meetingLink)}`;
+    navigate(`/dashboard/meet/join?link=${encodeURIComponent(meetingLink)}`);
   };
 
   return (
@@ -127,7 +128,7 @@ export default function MeetPage() {
                         variant="heroOutline"
                         className="flex-1"
                         onClick={() => {
-                          window.location.href = `mailto:?subject=Join my VertoX meeting&body=Join my meeting: ${generatedLink}`;
+                          window.open(`mailto:?subject=Join my VertoX meeting&body=Join my meeting: ${generatedLink}`, '_blank');
                         }}
                       >
                         <Mail className="h-4 w-4 mr-2" />
@@ -137,7 +138,7 @@ export default function MeetPage() {
                         variant="hero"
                         className="flex-1"
                         onClick={() => {
-                          window.location.href = `/dashboard/meet/join?link=${encodeURIComponent(generatedLink)}`;
+                          navigate(`/dashboard/meet/join?link=${encodeURIComponent(generatedLink)}`);
                         }}
                       >
                         Start Now
