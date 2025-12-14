@@ -11,9 +11,18 @@ import { Footer } from '@/components/landing/Footer';
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen premium-bg">
+      {/* Background effects */}
+      <div className="noise-overlay" />
+      <div className="wave-lines" />
+      <div className="light-beam" />
+      <div className="sound-wave">
+        <span /><span /><span /><span /><span />
+        <span /><span /><span /><span /><span /><span />
+      </div>
+      
       <Header />
-      <main>
+      <main className="relative z-10">
         <HeroSection />
         <DemoSection />
         <FeaturesSection />
