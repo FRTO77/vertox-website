@@ -20,6 +20,11 @@ import AccountPage from "./pages/AccountPage";
 import PricingPage from "./pages/PricingPage";
 import CareersPage from "./pages/CareersPage";
 import CommunityPage from "./pages/CommunityPage";
+import ContactPage from "./pages/ContactPage";
+import TermsPage from "./pages/TermsPage";
+import PrivacyPage from "./pages/PrivacyPage";
+import CookiesPage from "./pages/CookiesPage";
+import PartnershipPage from "./pages/PartnershipPage";
 import APIPage from "./pages/solutions/APIPage";
 import OnlineMeetingsPage from "./pages/solutions/OnlineMeetingsPage";
 import PhysicalMeetingsPage from "./pages/solutions/PhysicalMeetingsPage";
@@ -61,11 +66,11 @@ const App = () => {
             {/* Other pages */}
             <Route path="/careers" element={<CareersPage />} />
             <Route path="/community" element={<CommunityPage />} />
-            <Route path="/terms" element={<NotFound />} />
-            <Route path="/privacy" element={<NotFound />} />
-            <Route path="/cookies" element={<NotFound />} />
-            <Route path="/contact" element={<NotFound />} />
-            <Route path="/partnership" element={<NotFound />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/cookies" element={<CookiesPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/partnership" element={<PartnershipPage />} />
             <Route path="/docs" element={<NotFound />} />
             <Route path="/blog" element={<NotFound />} />
             
