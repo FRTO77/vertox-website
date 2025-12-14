@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Mic, Play, Square, Trash2, Volume2 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Mic, Play, Square, Trash2, Volume2, Bot, Sparkles, MessageCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface VoiceRecording {
@@ -10,11 +11,14 @@ interface VoiceRecording {
   name: string;
   duration: number;
   createdAt: Date;
+  type: 'manual' | 'ai-conversation';
 }
 
 export default function VoicePage() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordings, setRecordings] = useState<VoiceRecording[]>([]);
+  const [aiAssistantEnabled, setAiAssistantEnabled] = useState(false);
+  const [isAiListening, setIsAiListening] = useState(false);
   const { toast } = useToast();
 
   const handleStartRecording = () => {
@@ -29,9 +33,47 @@ export default function VoicePage() {
       name: `Recording ${recordings.length + 1}`,
       duration: Math.floor(Math.random() * 60) + 10,
       createdAt: new Date(),
+      type: 'manual',
     };
     setRecordings((prev) => [newRecording, ...prev]);
     toast({ title: 'Recording saved', description: 'Your voice sample has been saved' });
+  };
+
+  const handleToggleAiAssistant = (enabled: boolean) => {
+    setAiAssistantEnabled(enabled);
+    if (enabled) {
+      toast({ 
+        title: 'AI Assistant activated', 
+        description: 'Start talking - share your plans, ideas, or anything on your mind' 
+      });
+    } else {
+      setIsAiListening(false);
+      toast({ title: 'AI Assistant deactivated' });
+    }
+  };
+
+  const handleStartAiConversation = () => {
+    setIsAiListening(true);
+    toast({ 
+      title: 'AI is listening...', 
+      description: 'Talk about your plans, ideas, or anything you want. AI will learn your voice.' 
+    });
+  };
+
+  const handleStopAiConversation = () => {
+    setIsAiListening(false);
+    const newRecording: VoiceRecording = {
+      id: crypto.randomUUID(),
+      name: `AI Conversation ${recordings.filter(r => r.type === 'ai-conversation').length + 1}`,
+      duration: Math.floor(Math.random() * 180) + 30,
+      createdAt: new Date(),
+      type: 'ai-conversation',
+    };
+    setRecordings((prev) => [newRecording, ...prev]);
+    toast({ 
+      title: 'Conversation saved', 
+      description: 'AI has analyzed your voice, tone, and emotions from this conversation' 
+    });
   };
 
   const handleDelete = (id: string) => {
@@ -60,20 +102,92 @@ export default function VoicePage() {
           </p>
         </motion.div>
 
-        {/* Recording Section */}
+        {/* AI Assistant Section */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
           className="glass-card p-8 mb-8"
         >
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                <Bot className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold">AI Voice Assistant</h3>
+                <p className="text-sm text-muted-foreground">Talk naturally, AI learns your voice</p>
+              </div>
+            </div>
+            <Switch
+              checked={aiAssistantEnabled}
+              onCheckedChange={handleToggleAiAssistant}
+            />
+          </div>
+
+          {aiAssistantEnabled && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="border-t border-border/50 pt-6"
+            >
+              <div className="text-center">
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={isAiListening ? handleStopAiConversation : handleStartAiConversation}
+                  className={`w-28 h-28 rounded-full flex items-center justify-center mx-auto mb-6 transition-all duration-300 relative ${
+                    isAiListening
+                      ? 'bg-gradient-to-br from-primary to-accent'
+                      : 'bg-gradient-to-br from-primary/80 to-accent/80 hover:from-primary hover:to-accent'
+                  }`}
+                >
+                  {isAiListening && (
+                    <>
+                      <span className="absolute inset-0 rounded-full bg-primary/30 animate-ping" />
+                      <span className="absolute inset-[-8px] rounded-full border-2 border-primary/40 animate-pulse" />
+                    </>
+                  )}
+                  {isAiListening ? (
+                    <Square className="h-10 w-10 text-primary-foreground relative z-10" />
+                  ) : (
+                    <MessageCircle className="h-10 w-10 text-primary-foreground relative z-10" />
+                  )}
+                </motion.button>
+
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <h3 className="text-xl font-semibold">
+                    {isAiListening ? 'AI is listening...' : 'Start Conversation'}
+                  </h3>
+                </div>
+                <p className="text-muted-foreground text-sm max-w-md mx-auto">
+                  {isAiListening
+                    ? 'Share your thoughts, plans, or ideas. AI is learning your voice, tone, and emotions.'
+                    : 'Talk about your plans, ideas, or anything you want. The AI will record and learn your unique voice characteristics.'}
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </motion.div>
+
+        {/* Manual Recording Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.15 }}
+          className="glass-card p-8 mb-8"
+        >
           <div className="text-center">
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={isRecording ? handleStopRecording : handleStartRecording}
+              disabled={isAiListening}
               className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 transition-all duration-300 ${
                 isRecording
                   ? 'bg-destructive text-destructive-foreground animate-pulse'
+                  : isAiListening
+                  ? 'bg-muted text-muted-foreground cursor-not-allowed'
                   : 'bg-primary text-primary-foreground hover:bg-primary/90'
               }`}
             >
@@ -85,12 +199,12 @@ export default function VoicePage() {
             </motion.button>
 
             <h3 className="text-xl font-semibold mb-2">
-              {isRecording ? 'Recording...' : 'Record Your Voice'}
+              {isRecording ? 'Recording...' : 'Manual Recording'}
             </h3>
             <p className="text-muted-foreground text-sm max-w-md mx-auto">
               {isRecording
                 ? 'Speak naturally. Click the button to stop recording.'
-                : 'Click the microphone to start recording. We recommend at least 30 seconds for best results.'}
+                : 'Click the microphone to start a manual recording. We recommend at least 30 seconds for best results.'}
             </p>
           </div>
         </motion.div>
@@ -153,11 +267,26 @@ export default function VoicePage() {
                   key={recording.id}
                   className="glass-card p-4 flex items-center gap-4"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Volume2 className="h-5 w-5 text-primary" />
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                    recording.type === 'ai-conversation' 
+                      ? 'bg-gradient-to-br from-primary/20 to-accent/20' 
+                      : 'bg-primary/10'
+                  }`}>
+                    {recording.type === 'ai-conversation' ? (
+                      <MessageCircle className="h-5 w-5 text-primary" />
+                    ) : (
+                      <Volume2 className="h-5 w-5 text-primary" />
+                    )}
                   </div>
                   <div className="flex-1">
-                    <p className="font-medium">{recording.name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium">{recording.name}</p>
+                      {recording.type === 'ai-conversation' && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                          AI Learned
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm text-muted-foreground">
                       {formatDuration(recording.duration)} • {recording.createdAt.toLocaleDateString()}
                     </p>
