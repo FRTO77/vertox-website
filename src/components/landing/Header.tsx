@@ -8,6 +8,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { GlobalSearch } from '@/components/GlobalSearch';
 
 const solutions = [
   { name: 'API for Developers', href: '/solutions/api', description: 'Integrate translation into your apps' },
@@ -103,6 +104,9 @@ export function Header() {
 
           {/* Right side */}
           <div className="hidden lg:flex items-center gap-3">
+            {/* Global Search */}
+            <GlobalSearch />
+
             {/* Language Switcher */}
             <Popover>
               <PopoverTrigger asChild>
