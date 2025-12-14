@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/landing/Header';
 import { Footer } from '@/components/landing/Footer';
 import { Button } from '@/components/ui/button';
@@ -79,6 +79,16 @@ const plans = [
 ];
 
 export default function PricingPage() {
+  const navigate = useNavigate();
+
+  const handlePlanSelect = (planId: string) => {
+    if (planId === 'enterprise') {
+      navigate('/contact');
+    } else {
+      navigate(`/checkout?plan=${planId}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -136,15 +146,14 @@ export default function PricingPage() {
                     ))}
                   </ul>
 
-                  <Link to="/signup">
-                    <Button
-                      variant={plan.popular ? 'hero' : 'glass'}
-                      className="w-full"
-                    >
-                      {plan.cta}
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </Link>
+                  <Button
+                    variant={plan.popular ? 'hero' : 'glass'}
+                    className="w-full"
+                    onClick={() => handlePlanSelect(plan.id)}
+                  >
+                    {plan.cta}
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
                 </motion.div>
               ))}
             </div>

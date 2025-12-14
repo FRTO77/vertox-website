@@ -20,6 +20,7 @@ import VoicePage from "./pages/VoicePage";
 import SettingsPage from "./pages/SettingsPage";
 import AccountPage from "./pages/AccountPage";
 import PricingPage from "./pages/PricingPage";
+import CheckoutPage from "./pages/CheckoutPage";
 import CareersPage from "./pages/CareersPage";
 import CommunityPage from "./pages/CommunityPage";
 import ContactPage from "./pages/ContactPage";
@@ -56,6 +57,7 @@ const App = () => {
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
             
             {/* Dashboard routes */}
             <Route path="/dashboard" element={<Dashboard />} />
