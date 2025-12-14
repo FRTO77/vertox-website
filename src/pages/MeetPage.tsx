@@ -42,15 +42,15 @@ export default function MeetPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 lg:p-8 max-w-4xl mx-auto">
+      <div className="p-8 lg:p-10 max-w-4xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="mb-8"
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="mb-10"
         >
-          <h1 className="text-2xl lg:text-3xl font-bold mb-2">VertoX Meet</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl lg:text-3xl font-semibold tracking-tight mb-2">VertoX Meet</h1>
+          <p className="text-muted-foreground/90">
             Start or join a meeting with real-time translation
           </p>
         </motion.div>
@@ -58,16 +58,16 @@ export default function MeetPage() {
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Join Meeting */}
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
+            transition={{ duration: 0.4, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="glass-card p-6">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-                <LinkIcon className="h-6 w-6 text-primary" />
+            <div className="glass-card p-7">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-5">
+                <LinkIcon className="h-5 w-5 text-primary" />
               </div>
-              <h2 className="text-xl font-semibold mb-2">Join a Meeting</h2>
-              <p className="text-sm text-muted-foreground mb-6">
+              <h2 className="text-xl font-semibold tracking-tight mb-2">Join a Meeting</h2>
+              <p className="text-sm text-muted-foreground/90 mb-6 leading-relaxed">
                 Enter the meeting link to join an existing meeting
               </p>
               
@@ -76,7 +76,7 @@ export default function MeetPage() {
                   placeholder="Enter meeting link"
                   value={meetingLink}
                   onChange={(e) => setMeetingLink(e.target.value)}
-                  className="h-12 bg-secondary/50 border-border"
+                  className="h-12 bg-secondary/40 border-border/60"
                 />
                 <Button variant="hero" className="w-full" onClick={handleJoin}>
                   Join Meeting
@@ -87,16 +87,16 @@ export default function MeetPage() {
 
           {/* New Meeting */}
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.2 }}
+            transition={{ duration: 0.4, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="glass-card p-6">
-              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4">
-                <Video className="h-6 w-6 text-accent" />
+            <div className="glass-card p-7">
+              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-5">
+                <Video className="h-5 w-5 text-accent" />
               </div>
-              <h2 className="text-xl font-semibold mb-2">New Meeting</h2>
-              <p className="text-sm text-muted-foreground mb-6">
+              <h2 className="text-xl font-semibold tracking-tight mb-2">New Meeting</h2>
+              <p className="text-sm text-muted-foreground/90 mb-6 leading-relaxed">
                 Generate a new meeting link and invite participants
               </p>
               

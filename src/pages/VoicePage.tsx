@@ -47,15 +47,15 @@ export default function VoicePage() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 lg:p-8 max-w-4xl mx-auto">
+      <div className="p-8 lg:p-10 max-w-4xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="mb-8"
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="mb-10"
         >
-          <h1 className="text-2xl lg:text-3xl font-bold mb-2">Your Voice</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl lg:text-3xl font-semibold tracking-tight mb-2">Your Voice</h1>
+          <p className="text-muted-foreground/90">
             Record your voice so AI can learn your tone and emotions for natural translations
           </p>
         </motion.div>
