@@ -3,49 +3,49 @@ import { Waves, UserCheck, Sparkles, Volume2 } from 'lucide-react';
 
 export function VoiceCloningSection() {
   return (
-    <section className="py-24 bg-muted/30 relative overflow-hidden">
+    <section className="py-28 md:py-36 bg-muted/20 relative overflow-hidden">
       {/* Background elements */}
       <div className="absolute inset-0">
-        <div className="absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+        <div className="absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-border/40 to-transparent" />
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-5xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="text-center mb-16"
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm mb-6">
-              <Waves className="h-4 w-4" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/15 text-primary text-[13px] font-medium mb-6">
+              <Waves className="h-3.5 w-3.5" />
               Voice Cloning Technology
             </div>
             
-            <h2 className="text-3xl sm:text-4xl font-bold mb-6">
+            <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight mb-6">
               Your voice, any language
             </h2>
             
-            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+            <p className="text-muted-foreground/90 max-w-2xl mx-auto text-lg leading-relaxed">
               VertoX clones your unique voice characteristics — tone, pitch, and emotions — 
               making translations sound authentically you.
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.1 }}
+              transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
               className="text-center"
             >
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center mx-auto mb-6">
-                <Volume2 className="h-8 w-8 text-primary" />
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 border border-primary/15 flex items-center justify-center mx-auto mb-6">
+                <Volume2 className="h-7 w-7 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Record Your Voice</h3>
-              <p className="text-muted-foreground">
+              <h3 className="text-xl font-semibold mb-3 tracking-tight">Record Your Voice</h3>
+              <p className="text-muted-foreground/90 leading-relaxed">
                 A short voice sample is all we need to capture your unique vocal characteristics.
               </p>
             </motion.div>
@@ -54,14 +54,14 @@ export function VoiceCloningSection() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 }}
+              transition={{ duration: 0.5, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
               className="text-center"
             >
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent/20 to-accent/5 border border-accent/20 flex items-center justify-center mx-auto mb-6">
-                <Sparkles className="h-8 w-8 text-accent" />
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent/15 to-accent/5 border border-accent/15 flex items-center justify-center mx-auto mb-6">
+                <Sparkles className="h-7 w-7 text-accent" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">AI Learns You</h3>
-              <p className="text-muted-foreground">
+              <h3 className="text-xl font-semibold mb-3 tracking-tight">AI Learns You</h3>
+              <p className="text-muted-foreground/90 leading-relaxed">
                 Our AI analyzes and learns your tone, emotions, and speaking patterns.
               </p>
             </motion.div>
@@ -70,14 +70,14 @@ export function VoiceCloningSection() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.3 }}
+              transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
               className="text-center"
             >
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/10 border border-primary/20 flex items-center justify-center mx-auto mb-6">
-                <UserCheck className="h-8 w-8 text-primary" />
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/15 to-accent/8 border border-primary/15 flex items-center justify-center mx-auto mb-6">
+                <UserCheck className="h-7 w-7 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Sound Like You</h3>
-              <p className="text-muted-foreground">
+              <h3 className="text-xl font-semibold mb-3 tracking-tight">Sound Like You</h3>
+              <p className="text-muted-foreground/90 leading-relaxed">
                 Translations are delivered in your cloned voice — indistinguishable and safe.
               </p>
             </motion.div>
