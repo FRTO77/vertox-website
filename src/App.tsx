@@ -14,6 +14,7 @@ import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
 import LLMPage from "./pages/LLMPage";
 import MeetPage from "./pages/MeetPage";
+import PreJoinPage from "./pages/PreJoinPage";
 import VoicePage from "./pages/VoicePage";
 import SettingsPage from "./pages/SettingsPage";
 import AccountPage from "./pages/AccountPage";
@@ -58,6 +59,7 @@ const App = () => {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/llm" element={<LLMPage />} />
             <Route path="/dashboard/meet" element={<MeetPage />} />
+            <Route path="/dashboard/meet/join" element={<PreJoinPage />} />
             <Route path="/dashboard/voice" element={<VoicePage />} />
             <Route path="/dashboard/settings" element={<SettingsPage />} />
             <Route path="/dashboard/account" element={<AccountPage />} />
