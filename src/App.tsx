@@ -25,6 +25,8 @@ import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import CookiesPage from "./pages/CookiesPage";
 import PartnershipPage from "./pages/PartnershipPage";
+import DocsPage from "./pages/DocsPage";
+import BlogPage from "./pages/BlogPage";
 import APIPage from "./pages/solutions/APIPage";
 import OnlineMeetingsPage from "./pages/solutions/OnlineMeetingsPage";
 import PhysicalMeetingsPage from "./pages/solutions/PhysicalMeetingsPage";
@@ -71,8 +73,8 @@ const App = () => {
             <Route path="/cookies" element={<CookiesPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/partnership" element={<PartnershipPage />} />
-            <Route path="/docs" element={<NotFound />} />
-            <Route path="/blog" element={<NotFound />} />
+            <Route path="/docs" element={<DocsPage />} />
+            <Route path="/blog" element={<BlogPage />} />
             
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
