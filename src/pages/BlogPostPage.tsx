@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Calendar, Clock, User, Share2, Twitter, Linkedin, Copy, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import DOMPurify from "dompurify";
 
 const BlogPostPage = () => {
   const { slug } = useParams();
@@ -155,7 +156,7 @@ const BlogPostPage = () => {
                 prose-ul:text-muted-foreground prose-ul:my-4
                 prose-li:mb-2
                 prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
-              dangerouslySetInnerHTML={{ __html: post.content }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
             />
 
             {/* Share Section */}

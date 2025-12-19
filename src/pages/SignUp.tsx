@@ -8,6 +8,23 @@ import { signUp, setCurrentUser, getUsers } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Eye, EyeOff, Check, Phone, ArrowRight } from 'lucide-react';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
+import { z } from 'zod';
+
+// Validation schemas
+const nicknameSchema = z.string()
+  .min(3, 'Nickname must be at least 3 characters')
+  .max(20, 'Nickname must be 20 characters or less')
+  .regex(/^[a-zA-Z0-9_]+$/, 'Nickname can only contain letters, numbers, and underscores');
+
+const passwordSchema = z.string()
+  .min(8, 'Password must be at least 8 characters')
+  .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+  .regex(/[0-9]/, 'Password must contain at least one number');
+
+const phoneSchema = z.string()
+  .min(6, 'Phone number must be at least 6 digits')
+  .max(15, 'Phone number must be 15 digits or less')
+  .regex(/^\d+$/, 'Phone number must contain only digits');
 
 type RegistrationStep = 'credentials' | 'phone-verify';
 
@@ -56,6 +73,28 @@ export default function SignUp() {
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validate nickname with zod
+    const nicknameResult = nicknameSchema.safeParse(nickname.trim());
+    if (!nicknameResult.success) {
+      toast({
+        title: 'Invalid nickname',
+        description: nicknameResult.error.errors[0].message,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validate password with zod
+    const passwordResult = passwordSchema.safeParse(password);
+    if (!passwordResult.success) {
+      toast({
+        title: 'Invalid password',
+        description: passwordResult.error.errors[0].message,
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (password !== confirmPassword) {
       toast({
         title: 'Passwords do not match',
@@ -64,18 +103,10 @@ export default function SignUp() {
       return;
     }
 
-    if (!passwordRequirements.every(req => req.met)) {
-      toast({
-        title: 'Password requirements not met',
-        variant: 'destructive',
-      });
-      return;
-    }
-
     // Check if nickname is already taken BEFORE moving to phone step
     const users = getUsers();
     const nicknameExists = Object.values(users).some(
-      u => u.user.nickname.toLowerCase() === nickname.toLowerCase()
+      u => u.user.nickname.toLowerCase() === nickname.trim().toLowerCase()
     );
     
     if (nicknameExists) {
@@ -113,10 +144,12 @@ export default function SignUp() {
 
   // Send OTP
   const handleSendOTP = async () => {
-    if (!phoneNumber.trim() || phoneNumber.length < 6) {
+    // Validate phone number with zod
+    const phoneResult = phoneSchema.safeParse(phoneNumber.trim());
+    if (!phoneResult.success) {
       toast({
         title: 'Invalid phone number',
-        description: 'Please enter a valid phone number',
+        description: phoneResult.error.errors[0].message,
         variant: 'destructive',
       });
       return;
