@@ -7,6 +7,16 @@ import { Label } from '@/components/ui/label';
 import { signIn, setCurrentUser, User } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Eye, EyeOff, Shield } from 'lucide-react';
+import { z } from 'zod';
+
+// Validation schemas
+const nicknameSchema = z.string()
+  .min(1, 'Nickname is required')
+  .max(50, 'Nickname is too long');
+
+const passwordSchema = z.string()
+  .min(1, 'Password is required')
+  .max(128, 'Password is too long');
 
 export default function SignIn() {
   const [nickname, setNickname] = useState('');
@@ -22,10 +32,32 @@ export default function SignIn() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate inputs with zod
+    const nicknameResult = nicknameSchema.safeParse(nickname.trim());
+    if (!nicknameResult.success) {
+      toast({
+        title: 'Invalid nickname',
+        description: nicknameResult.error.errors[0].message,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const passwordResult = passwordSchema.safeParse(password);
+    if (!passwordResult.success) {
+      toast({
+        title: 'Invalid password',
+        description: passwordResult.error.errors[0].message,
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const user = await signIn(nickname, password);
+      const user = await signIn(nickname.trim(), password);
       setPendingUser(user);
       setStep('2fa');
       toast({
