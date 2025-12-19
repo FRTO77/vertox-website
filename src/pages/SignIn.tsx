@@ -1,44 +1,52 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { signIn, setCurrentUser, User } from '@/lib/auth';
+import { signIn, getSession } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Eye, EyeOff, Shield } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { z } from 'zod';
 
 // Validation schemas
-const nicknameSchema = z.string()
-  .min(1, 'Nickname is required')
-  .max(50, 'Nickname is too long');
+const emailSchema = z.string()
+  .min(1, 'Email is required')
+  .email('Please enter a valid email address')
+  .max(255, 'Email is too long');
 
 const passwordSchema = z.string()
   .min(1, 'Password is required')
   .max(128, 'Password is too long');
 
 export default function SignIn() {
-  const [nickname, setNickname] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState<'credentials' | '2fa'>('credentials');
-  const [otpCode, setOtpCode] = useState(['', '', '', '', '', '']);
-  const [pendingUser, setPendingUser] = useState<User | null>(null);
-  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Check if already logged in
+  useEffect(() => {
+    const checkSession = async () => {
+      const session = await getSession();
+      if (session) {
+        navigate('/dashboard');
+      }
+    };
+    checkSession();
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Validate inputs with zod
-    const nicknameResult = nicknameSchema.safeParse(nickname.trim());
-    if (!nicknameResult.success) {
+    const emailResult = emailSchema.safeParse(email.trim());
+    if (!emailResult.success) {
       toast({
-        title: 'Invalid nickname',
-        description: nicknameResult.error.errors[0].message,
+        title: 'Invalid email',
+        description: emailResult.error.errors[0].message,
         variant: 'destructive',
       });
       return;
@@ -57,13 +65,12 @@ export default function SignIn() {
     setLoading(true);
 
     try {
-      const user = await signIn(nickname.trim(), password);
-      setPendingUser(user);
-      setStep('2fa');
+      const user = await signIn(email.trim(), password);
       toast({
-        title: 'Verification required',
-        description: 'Enter the 6-digit code sent to your device',
+        title: 'Welcome back!',
+        description: `Signed in as ${user.nickname}`,
       });
+      navigate('/dashboard');
     } catch (error) {
       toast({
         title: 'Sign in failed',
@@ -73,57 +80,6 @@ export default function SignIn() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleOtpChange = (index: number, value: string) => {
-    if (value.length > 1) {
-      value = value.slice(-1);
-    }
-    if (!/^\d*$/.test(value)) return;
-
-    const newOtp = [...otpCode];
-    newOtp[index] = value;
-    setOtpCode(newOtp);
-
-    if (value && index < 5) {
-      otpRefs.current[index + 1]?.focus();
-    }
-  };
-
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === 'Backspace' && !otpCode[index] && index > 0) {
-      otpRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const handleVerify2FA = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const code = otpCode.join('');
-    
-    if (code.length !== 6) {
-      toast({
-        title: 'Invalid code',
-        description: 'Please enter the complete 6-digit code',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setLoading(true);
-
-    // Simulate 2FA verification (in production, verify against backend)
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    if (pendingUser) {
-      setCurrentUser(pendingUser);
-      toast({
-        title: 'Welcome back!',
-        description: `Signed in as ${pendingUser.nickname}`,
-      });
-      navigate('/dashboard');
-    }
-    
-    setLoading(false);
   };
 
   return (
@@ -151,109 +107,61 @@ export default function SignIn() {
 
         {/* Card */}
         <div className="glass-card p-8">
-          {step === 'credentials' ? (
-            <>
-              <div className="text-center mb-8">
-                <Link to="/" className="inline-block mb-4">
-                  <span className="text-2xl font-bold gradient-text">VertoX</span>
-                </Link>
-                <h1 className="text-2xl font-bold mb-2">Welcome back</h1>
-                <p className="text-muted-foreground">Sign in to your account</p>
-              </div>
+          <div className="text-center mb-8">
+            <Link to="/" className="inline-block mb-4">
+              <span className="text-2xl font-bold gradient-text">VertoX</span>
+            </Link>
+            <h1 className="text-2xl font-bold mb-2">Welcome back</h1>
+            <p className="text-muted-foreground">Sign in to your account</p>
+          </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="nickname">Nickname</Label>
-                  <Input
-                    id="nickname"
-                    type="text"
-                    placeholder="Enter your nickname"
-                    value={nickname}
-                    onChange={(e) => setNickname(e.target.value)}
-                    required
-                    className="h-12 bg-secondary/50 border-border"
-                  />
-                </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="h-12 bg-secondary/50 border-border"
+              />
+            </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="Enter your password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      className="h-12 bg-secondary/50 border-border pr-12"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    >
-                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
-                  </div>
-                </div>
-
-                <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
-                  {loading ? 'Signing in...' : 'Sign in'}
-                </Button>
-              </form>
-
-              <div className="mt-6 text-center text-sm text-muted-foreground">
-                Don't have an account?{' '}
-                <Link to="/signup" className="text-primary hover:underline font-medium">
-                  Sign up
-                </Link>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="text-center mb-8">
-                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                  <Shield className="h-8 w-8 text-primary" />
-                </div>
-                <h1 className="text-2xl font-bold mb-2">Two-Factor Authentication</h1>
-                <p className="text-muted-foreground">Enter the 6-digit code from your authenticator app</p>
-              </div>
-
-              <form onSubmit={handleVerify2FA} className="space-y-6">
-                <div className="flex justify-center gap-3">
-                  {otpCode.map((digit, index) => (
-                    <Input
-                      key={index}
-                      ref={(el) => (otpRefs.current[index] = el)}
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={1}
-                      value={digit}
-                      onChange={(e) => handleOtpChange(index, e.target.value)}
-                      onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                      className="w-12 h-14 text-center text-xl font-semibold bg-secondary/50 border-border"
-                    />
-                  ))}
-                </div>
-
-                <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
-                  {loading ? 'Verifying...' : 'Verify'}
-                </Button>
-
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="h-12 bg-secondary/50 border-border pr-12"
+                />
                 <button
                   type="button"
-                  onClick={() => {
-                    setStep('credentials');
-                    setOtpCode(['', '', '', '', '', '']);
-                    setPendingUser(null);
-                  }}
-                  className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
-                  ← Back to sign in
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
-              </form>
-            </>
-          )}
+              </div>
+            </div>
+
+            <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
+              {loading ? 'Signing in...' : 'Sign in'}
+            </Button>
+          </form>
+
+          <div className="mt-6 text-center text-sm text-muted-foreground">
+            Don't have an account?{' '}
+            <Link to="/signup" className="text-primary hover:underline font-medium">
+              Sign up
+            </Link>
+          </div>
         </div>
       </motion.div>
     </div>

@@ -79,19 +79,25 @@ const APIPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Load or generate API key from localStorage
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // Load user and API key
   useEffect(() => {
-    const user = getCurrentUser();
-    if (user) {
-      const storedKey = localStorage.getItem(`vertox_api_key_${user.id}`);
-      if (storedKey) {
-        setApiKey(storedKey);
+    const loadUser = async () => {
+      const user = await getCurrentUser();
+      if (user) {
+        setUserId(user.id);
+        const storedKey = localStorage.getItem(`vertox_api_key_${user.id}`);
+        if (storedKey) {
+          setApiKey(storedKey);
+        }
       }
-    }
+    };
+    loadUser();
   }, [apiKeyModalOpen]);
 
-  const handleGetApiKey = () => {
-    const user = getCurrentUser();
+  const handleGetApiKey = async () => {
+    const user = await getCurrentUser();
     if (!user) {
       toast({
         title: "Sign in required",
@@ -105,12 +111,11 @@ const APIPage = () => {
   };
 
   const handleGenerateKey = () => {
-    const user = getCurrentUser();
-    if (!user) return;
+    if (!userId) return;
     
     const newKey = generateApiKey();
     setApiKey(newKey);
-    localStorage.setItem(`vertox_api_key_${user.id}`, newKey);
+    localStorage.setItem(`vertox_api_key_${userId}`, newKey);
     toast({
       title: "API key generated",
       description: "Your new API key has been created",
@@ -118,12 +123,11 @@ const APIPage = () => {
   };
 
   const handleRegenerateKey = () => {
-    const user = getCurrentUser();
-    if (!user) return;
+    if (!userId) return;
     
     const newKey = generateApiKey();
     setApiKey(newKey);
-    localStorage.setItem(`vertox_api_key_${user.id}`, newKey);
+    localStorage.setItem(`vertox_api_key_${userId}`, newKey);
     toast({
       title: "API key regenerated",
       description: "Your old API key is no longer valid",

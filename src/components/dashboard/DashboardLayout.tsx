@@ -12,9 +12,9 @@ import {
   LogOut,
   HelpCircle,
   Download,
-  User
+  User as UserIcon
 } from 'lucide-react';
-import { getCurrentUser, signOut, User as UserType } from '@/lib/auth';
+import { getCurrentUser, signOut, onAuthStateChange, User } from '@/lib/auth';
 import { cn } from '@/lib/utils';
 import {
   Popover,
@@ -36,27 +36,51 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children, hideSidebar = false }: DashboardLayoutProps) {
   const [collapsed, setCollapsed] = useState(false);
-  const [user, setUser] = useState<UserType | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      navigate('/signin');
-    } else {
+    // Set up auth state listener
+    const { data: { subscription } } = onAuthStateChange((authUser) => {
+      setUser(authUser);
+      setLoading(false);
+      if (!authUser) {
+        navigate('/signin');
+      }
+    });
+
+    // Check for existing session
+    const checkUser = async () => {
+      const currentUser = await getCurrentUser();
       setUser(currentUser);
-    }
+      setLoading(false);
+      if (!currentUser) {
+        navigate('/signin');
+      }
+    };
+    checkUser();
+
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const handleSignOut = () => {
-    signOut();
+  const handleSignOut = async () => {
+    await signOut();
     navigate('/');
   };
 
   const getInitials = (nickname: string) => {
     return nickname.slice(0, 2).toUpperCase();
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   if (!user) return null;
 
@@ -176,7 +200,7 @@ export function DashboardLayout({ children, hideSidebar = false }: DashboardLayo
                   to="/dashboard/account"
                   className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg hover:bg-secondary/60 transition-all duration-200 text-sm"
                 >
-                  <User className="h-4 w-4 text-muted-foreground" />
+                  <UserIcon className="h-4 w-4 text-muted-foreground" />
                   My Account
                 </Link>
                 <Link

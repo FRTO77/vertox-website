@@ -5,15 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { 
-  User, 
+  User as UserIcon, 
   Camera, 
   Trash2, 
   Lock,
-  CreditCard,
   Check,
   Upload
 } from 'lucide-react';
-import { getCurrentUser, updateUser, deleteAccount, User as UserType } from '@/lib/auth';
+import { getCurrentUser, updateUser, deleteAccount, User } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -34,23 +33,29 @@ const plans = [
 ];
 
 export default function AccountPage() {
-  const [user, setUser] = useState<UserType | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [nickname, setNickname] = useState('');
   const [email, setEmail] = useState('');
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    if (currentUser) {
-      setUser(currentUser);
-      setNickname(currentUser.nickname);
-      setEmail(currentUser.email || '');
-      setAvatarPreview(currentUser.avatar || null);
-    }
+    const loadUser = async () => {
+      const currentUser = await getCurrentUser();
+      if (currentUser) {
+        setUser(currentUser);
+        setNickname(currentUser.nickname);
+        setEmail(currentUser.email || '');
+        setAvatarPreview(currentUser.avatar || null);
+      }
+      setLoading(false);
+    };
+    loadUser();
   }, []);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,11 +69,12 @@ export default function AccountPage() {
     }
   };
 
-  const handleSaveProfile = () => {
+  const handleSaveProfile = async () => {
     if (!user) return;
     
+    setSaving(true);
     try {
-      const updated = updateUser(user.id, {
+      const updated = await updateUser(user.id, {
         nickname,
         email: email || undefined,
         avatar: avatarPreview || undefined,
@@ -77,19 +83,40 @@ export default function AccountPage() {
       toast({ title: 'Profile updated successfully' });
     } catch (error) {
       toast({ 
-        title: 'Failed to update profile', 
+        title: 'Failed to update profile',
+        description: error instanceof Error ? error.message : 'Something went wrong',
+        variant: 'destructive' 
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+    
+    try {
+      await deleteAccount(user.id);
+      toast({ title: 'Account deleted' });
+      navigate('/');
+    } catch (error) {
+      toast({ 
+        title: 'Failed to delete account',
+        description: error instanceof Error ? error.message : 'Something went wrong',
         variant: 'destructive' 
       });
     }
   };
 
-  const handleDeleteAccount = () => {
-    if (!user) return;
-    
-    deleteAccount(user.id);
-    toast({ title: 'Account deleted' });
-    navigate('/');
-  };
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-screen">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   if (!user) return null;
 
@@ -146,7 +173,7 @@ export default function AccountPage() {
           >
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <User className="h-5 w-5 text-primary" />
+                <UserIcon className="h-5 w-5 text-primary" />
               </div>
               <div>
                 <h2 className="font-semibold">Profile</h2>
@@ -204,17 +231,19 @@ export default function AccountPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Email (optional)</Label>
+                  <Label>Email</Label>
                   <Input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="your@email.com"
                     className="h-12 bg-secondary/50"
+                    disabled
                   />
+                  <p className="text-xs text-muted-foreground">Email cannot be changed</p>
                 </div>
-                <Button variant="hero" onClick={handleSaveProfile}>
-                  Save Changes
+                <Button variant="hero" onClick={handleSaveProfile} disabled={saving}>
+                  {saving ? 'Saving...' : 'Save Changes'}
                 </Button>
               </div>
             </div>
