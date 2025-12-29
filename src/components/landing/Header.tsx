@@ -9,6 +9,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { GlobalSearch } from '@/components/GlobalSearch';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const solutions = [
   { name: 'API for Developers', href: '/solutions/api', description: 'Integrate translation into your apps' },
@@ -106,6 +107,9 @@ export function Header() {
           <div className="hidden lg:flex items-center gap-2">
             {/* Global Search */}
             <GlobalSearch />
+
+            {/* Theme Toggle */}
+            <ThemeToggle />
 
             {/* Language Switcher */}
             <Popover>
