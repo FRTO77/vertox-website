@@ -63,7 +63,7 @@
   }
 
   .light {
-    --background: 0 0% 100%;
+    --background: 210 20% 98%;
     --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
@@ -79,7 +79,7 @@
     --secondary-foreground: 222 47% 11%;
 
     --muted: 214 32% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted-foreground: 215 16% 40%;
 
     --accent: 160 84% 39%;
     --accent-foreground: 0 0% 100%;
@@ -87,16 +87,22 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 32% 91%;
+    --border: 214 32% 85%;
     --input: 214 32% 91%;
     --ring: 217 91% 50%;
 
-    --gradient-start: 0 0% 100%;
-    --gradient-mid: 214 32% 98%;
-    --gradient-end: 214 32% 96%;
+    --gradient-start: 210 20% 98%;
+    --gradient-mid: 214 32% 96%;
+    --gradient-end: 214 32% 94%;
+
+    --glow-primary: 217 91% 50%;
+    --glow-accent: 160 84% 39%;
 
     --glass-bg: 0 0% 100%;
-    --glass-border: 214 32% 85%;
+    --glass-border: 214 32% 80%;
+
+    --text-gradient-from: 217 91% 45%;
+    --text-gradient-to: 160 84% 35%;
 
     --sidebar-background: 214 32% 98%;
     --sidebar-foreground: 222 47% 11%;
@@ -218,6 +224,15 @@
     overflow: hidden;
     background: linear-gradient(
       180deg,
+      hsl(var(--gradient-start)) 0%,
+      hsl(var(--gradient-mid)) 50%,
+      hsl(var(--gradient-end)) 100%
+    );
+  }
+
+  :root .premium-bg {
+    background: linear-gradient(
+      180deg,
       hsl(222 55% 4%) 0%,
       hsl(222 50% 7%) 25%,
       hsl(220 48% 10%) 50%,
@@ -226,21 +241,36 @@
     );
   }
 
+  .light .premium-bg,
+  .light.premium-bg {
+    background: linear-gradient(
+      180deg,
+      hsl(210 20% 98%) 0%,
+      hsl(214 32% 96%) 50%,
+      hsl(214 32% 94%) 100%
+    );
+  }
+
   .premium-bg::before {
     content: '';
     position: fixed;
     inset: 0;
     background: 
-      /* Primary glow - top center */
-      radial-gradient(ellipse 100% 60% at 50% -10%, hsl(217 91% 55% / 0.12), transparent 60%),
-      /* Secondary glow - right */
-      radial-gradient(ellipse 50% 80% at 90% 20%, hsl(217 91% 50% / 0.08), transparent 50%),
-      /* Accent glow - left bottom */
-      radial-gradient(ellipse 60% 50% at 10% 80%, hsl(200 80% 45% / 0.06), transparent 50%),
-      /* Subtle center glow */
-      radial-gradient(ellipse 80% 40% at 50% 50%, hsl(220 60% 20% / 0.15), transparent 60%);
+      radial-gradient(ellipse 100% 60% at 50% -10%, hsl(var(--glow-primary) / 0.12), transparent 60%),
+      radial-gradient(ellipse 50% 80% at 90% 20%, hsl(var(--glow-primary) / 0.08), transparent 50%),
+      radial-gradient(ellipse 60% 50% at 10% 80%, hsl(var(--glow-accent) / 0.06), transparent 50%),
+      radial-gradient(ellipse 80% 40% at 50% 50%, hsl(var(--glow-primary) / 0.1), transparent 60%);
     pointer-events: none;
     z-index: 0;
+  }
+
+  .light .premium-bg::before,
+  .light.premium-bg::before {
+    background: 
+      radial-gradient(ellipse 100% 60% at 50% -10%, hsl(217 91% 55% / 0.08), transparent 60%),
+      radial-gradient(ellipse 50% 80% at 90% 20%, hsl(217 91% 50% / 0.05), transparent 50%),
+      radial-gradient(ellipse 60% 50% at 10% 80%, hsl(160 84% 39% / 0.04), transparent 50%),
+      radial-gradient(ellipse 80% 40% at 50% 50%, hsl(217 91% 50% / 0.06), transparent 60%);
   }
 
   /* Animated flowing gradient orbs */
@@ -249,12 +279,20 @@
     position: fixed;
     inset: 0;
     background: 
-      radial-gradient(circle 600px at var(--orb1-x, 30%) var(--orb1-y, 20%), hsl(217 91% 50% / 0.05), transparent 50%),
-      radial-gradient(circle 500px at var(--orb2-x, 70%) var(--orb2-y, 60%), hsl(200 80% 50% / 0.04), transparent 50%),
-      radial-gradient(circle 400px at var(--orb3-x, 50%) var(--orb3-y, 80%), hsl(217 91% 55% / 0.03), transparent 50%);
+      radial-gradient(circle 600px at var(--orb1-x, 30%) var(--orb1-y, 20%), hsl(var(--glow-primary) / 0.05), transparent 50%),
+      radial-gradient(circle 500px at var(--orb2-x, 70%) var(--orb2-y, 60%), hsl(var(--glow-accent) / 0.04), transparent 50%),
+      radial-gradient(circle 400px at var(--orb3-x, 50%) var(--orb3-y, 80%), hsl(var(--glow-primary) / 0.03), transparent 50%);
     animation: orbFloat 20s ease-in-out infinite;
     pointer-events: none;
     z-index: 0;
+  }
+
+  .light .premium-bg::after,
+  .light.premium-bg::after {
+    background: 
+      radial-gradient(circle 600px at var(--orb1-x, 30%) var(--orb1-y, 20%), hsl(217 91% 50% / 0.03), transparent 50%),
+      radial-gradient(circle 500px at var(--orb2-x, 70%) var(--orb2-y, 60%), hsl(160 84% 39% / 0.03), transparent 50%),
+      radial-gradient(circle 400px at var(--orb3-x, 50%) var(--orb3-y, 80%), hsl(217 91% 55% / 0.02), transparent 50%);
   }
 
   /* Noise texture overlay */
@@ -268,6 +306,11 @@
     mix-blend-mode: overlay;
   }
 
+  .light .noise-overlay {
+    opacity: 0.015;
+    mix-blend-mode: multiply;
+  }
+
   /* Subtle animated wave lines */
   .wave-lines {
     position: fixed;
@@ -276,6 +319,10 @@
     pointer-events: none;
     z-index: 0;
     opacity: 0.4;
+  }
+
+  .light .wave-lines {
+    opacity: 0.25;
   }
 
   .wave-lines::before,
@@ -299,6 +346,19 @@
     animation: waveMove 30s linear infinite;
   }
 
+  .light .wave-lines::before,
+  .light .wave-lines::after {
+    background: repeating-linear-gradient(
+      90deg,
+      transparent 0,
+      transparent 49.5%,
+      hsl(217 91% 50% / 0.03) 49.5%,
+      hsl(217 91% 50% / 0.03) 50.5%,
+      transparent 50.5%,
+      transparent 100%
+    );
+  }
+
   .wave-lines::after {
     background: repeating-linear-gradient(
       0deg,
@@ -311,6 +371,18 @@
     );
     background-size: 120px 120px;
     animation: waveMove 25s linear infinite reverse;
+  }
+
+  .light .wave-lines::after {
+    background: repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 49.5%,
+      hsl(217 91% 50% / 0.02) 49.5%,
+      hsl(217 91% 50% / 0.02) 50.5%,
+      transparent 50.5%,
+      transparent 100%
+    );
   }
 
   /* Flowing light beam */
@@ -330,6 +402,16 @@
     transform: translateX(-50%);
     pointer-events: none;
     z-index: 0;
+  }
+
+  .light .light-beam {
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      hsl(217 91% 50% / 0.06) 20%,
+      hsl(217 91% 50% / 0.03) 50%,
+      transparent 100%
+    );
   }
 
   .light-beam::before,
@@ -366,12 +448,20 @@
     z-index: 0;
   }
 
+  .light .sound-wave {
+    opacity: 0.12;
+  }
+
   .sound-wave span {
     width: 2px;
     height: 20px;
     background: linear-gradient(180deg, hsl(217 91% 60%), hsl(200 80% 50%));
     border-radius: 2px;
     animation: soundWave 1.5s ease-in-out infinite;
+  }
+
+  .light .sound-wave span {
+    background: linear-gradient(180deg, hsl(217 91% 50%), hsl(160 84% 39%));
   }
 
   .sound-wave span:nth-child(1) { animation-delay: 0s; height: 15px; }
