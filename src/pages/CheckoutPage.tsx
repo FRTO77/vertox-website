@@ -260,7 +260,31 @@ export default function CheckoutPage() {
                   >
                     <h2 className="text-xl font-semibold mb-4">Select Payment Method</h2>
                     <div className="space-y-3">
-                      {/* Stripe Option */}
+                      {/* Credit/Debit Card Option */}
+                      <button
+                        onClick={() => handleSelectPayment('stripe')}
+                        disabled={!isLoggedIn && plan.price !== '$0'}
+                        className={`w-full p-4 rounded-lg border-2 transition-all text-left border-border hover:border-primary hover:bg-primary/5 ${
+                          !isLoggedIn && plan.price !== '$0' ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-8 bg-gradient-to-r from-[#1a1f71] to-[#f7b600] rounded flex items-center justify-center">
+                              <CreditCard className="h-4 w-4 text-white" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Credit / Debit Card</p>
+                              <p className="text-sm text-muted-foreground">
+                                Visa, Mastercard, Amex & more
+                              </p>
+                            </div>
+                          </div>
+                          <ArrowLeft className="h-4 w-4 rotate-180 text-muted-foreground" />
+                        </div>
+                      </button>
+
+                      {/* Stripe Checkout Option */}
                       <button
                         onClick={() => handleSelectPayment('stripe')}
                         disabled={!isLoggedIn && plan.price !== '$0'}
@@ -274,9 +298,9 @@ export default function CheckoutPage() {
                               <span className="text-white font-bold text-xs">stripe</span>
                             </div>
                             <div>
-                              <p className="font-medium">Credit / Debit Card</p>
+                              <p className="font-medium">Stripe</p>
                               <p className="text-sm text-muted-foreground">
-                                Visa, Mastercard, Amex & more
+                                Apple Pay, Google Pay, Link & more
                               </p>
                             </div>
                           </div>
