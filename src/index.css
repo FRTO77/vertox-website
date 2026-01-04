@@ -182,6 +182,39 @@
                 linear-gradient(180deg, hsl(var(--gradient-start)), hsl(var(--gradient-mid)), hsl(var(--gradient-end)));
   }
 
+  .light .hero-gradient {
+    background: radial-gradient(ellipse 80% 50% at 50% -20%, hsl(217 91% 50% / 0.08), transparent),
+                radial-gradient(ellipse 60% 40% at 80% 60%, hsl(160 84% 39% / 0.05), transparent),
+                linear-gradient(180deg, hsl(210 20% 98%), hsl(214 32% 96%), hsl(214 32% 94%));
+  }
+
+  .light .gradient-text {
+    background: linear-gradient(135deg, hsl(217 91% 45%), hsl(160 84% 35%));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .light .glass-card {
+    background: hsl(0 0% 100% / 0.8);
+    box-shadow: 
+      0 0 0 1px hsl(214 32% 85% / 0.5),
+      0 2px 4px -1px hsl(222 47% 11% / 0.05),
+      0 8px 16px -4px hsl(222 47% 11% / 0.04);
+  }
+
+  .light .glass-card:hover {
+    border-color: hsl(214 32% 75%);
+    box-shadow: 
+      0 0 0 1px hsl(217 91% 50% / 0.1),
+      0 4px 8px -2px hsl(222 47% 11% / 0.08),
+      0 16px 32px -8px hsl(222 47% 11% / 0.06);
+  }
+
+  .light .grain::before {
+    opacity: 0.015;
+  }
+
   .card-gradient {
     background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--muted)) 100%);
   }
