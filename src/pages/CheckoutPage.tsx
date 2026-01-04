@@ -26,6 +26,12 @@ const plans: Record<string, { name: string; price: string; period: string; featu
     period: '/month',
     features: ['100 minutes/month', '10 languages', 'Standard audio quality', 'Web access only', 'Community support'],
   },
+  weekly: {
+    name: 'Weekly',
+    price: '$6',
+    period: '/week',
+    features: ['500 minutes/week', '20 languages', 'HD audio quality', 'Web & mobile access', 'Email support'],
+  },
   pro: {
     name: 'Pro',
     price: '$20',
