@@ -23,6 +23,22 @@ const plans = [
     popular: false,
   },
   {
+    id: 'weekly',
+    name: 'Weekly',
+    price: '$6',
+    period: '/week',
+    description: 'Flexible weekly access',
+    features: [
+      '500 minutes/week',
+      '20 languages',
+      'HD audio quality',
+      'Web & mobile access',
+      'Email support',
+    ],
+    cta: 'Start Weekly',
+    popular: false,
+  },
+  {
     id: 'pro',
     name: 'Pro',
     price: '$20',
@@ -110,7 +126,7 @@ export default function PricingPage() {
               </p>
             </motion.div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+            <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6 max-w-7xl mx-auto">
               {plans.map((plan, i) => (
                 <motion.div
                   key={plan.id}
