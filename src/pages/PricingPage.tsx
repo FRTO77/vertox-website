@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/landing/Header';
 import { Footer } from '@/components/landing/Footer';
@@ -9,7 +10,8 @@ const plans = [
   {
     id: 'free',
     name: 'Free',
-    price: '$0',
+    monthlyPrice: 0,
+    yearlyPrice: 0,
     period: '/month',
     description: 'Perfect for trying out VertoX',
     features: [
@@ -21,11 +23,13 @@ const plans = [
     ],
     cta: 'Get Started',
     popular: false,
+    hasYearly: false,
   },
   {
     id: 'weekly',
     name: 'Weekly',
-    price: '$6',
+    monthlyPrice: 6,
+    yearlyPrice: 6,
     period: '/week',
     description: 'Flexible weekly access',
     features: [
@@ -37,11 +41,13 @@ const plans = [
     ],
     cta: 'Start Weekly',
     popular: false,
+    hasYearly: false,
   },
   {
     id: 'pro',
     name: 'Pro',
-    price: '$20',
+    monthlyPrice: 20,
+    yearlyPrice: 192, // $16/month billed yearly (20% off)
     period: '/month',
     description: 'For professionals and creators',
     features: [
@@ -55,11 +61,13 @@ const plans = [
     ],
     cta: 'Start Free Trial',
     popular: true,
+    hasYearly: true,
   },
   {
     id: 'premium',
     name: 'Premium',
-    price: '$45',
+    monthlyPrice: 45,
+    yearlyPrice: 432, // $36/month billed yearly (20% off)
     period: '/month',
     description: 'For teams and businesses',
     features: [
@@ -73,11 +81,13 @@ const plans = [
     ],
     cta: 'Start Free Trial',
     popular: false,
+    hasYearly: true,
   },
   {
     id: 'enterprise',
     name: 'Enterprise',
-    price: 'Custom',
+    monthlyPrice: null,
+    yearlyPrice: null,
     period: '',
     description: 'For large organizations',
     features: [
@@ -91,18 +101,44 @@ const plans = [
     ],
     cta: 'Contact Sales',
     popular: false,
+    hasYearly: false,
   },
 ];
 
 export default function PricingPage() {
   const navigate = useNavigate();
+  const [isYearly, setIsYearly] = useState(false);
 
   const handlePlanSelect = (planId: string) => {
     if (planId === 'enterprise') {
       navigate('/contact');
     } else {
-      navigate(`/checkout?plan=${planId}`);
+      navigate(`/checkout?plan=${planId}&billing=${isYearly ? 'yearly' : 'monthly'}`);
     }
+  };
+
+  const getDisplayPrice = (plan: typeof plans[0]) => {
+    if (plan.monthlyPrice === null) return 'Custom';
+    if (plan.monthlyPrice === 0) return '$0';
+    
+    if (isYearly && plan.hasYearly) {
+      const monthlyEquivalent = Math.round(plan.yearlyPrice / 12);
+      return `$${monthlyEquivalent}`;
+    }
+    return `$${plan.monthlyPrice}`;
+  };
+
+  const getDisplayPeriod = (plan: typeof plans[0]) => {
+    if (plan.monthlyPrice === null) return '';
+    if (plan.id === 'weekly') return '/week';
+    return '/month';
+  };
+
+  const getSavingsLabel = (plan: typeof plans[0]) => {
+    if (!plan.hasYearly || !isYearly) return null;
+    const monthlyCost = plan.monthlyPrice! * 12;
+    const savings = monthlyCost - plan.yearlyPrice;
+    return `Save $${savings}/year`;
   };
 
   return (
@@ -116,14 +152,64 @@ export default function PricingPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="text-center mb-16"
+              className="text-center mb-12"
             >
               <h1 className="text-4xl sm:text-5xl font-bold mb-6">
                 Simple, transparent pricing
               </h1>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
                 Choose the plan that's right for you. All plans include a 7-day free trial.
               </p>
+
+              {/* Billing Toggle */}
+              <div className="inline-flex items-center gap-4 p-1.5 bg-secondary/50 backdrop-blur-sm rounded-full border border-border/50">
+                <button
+                  onClick={() => setIsYearly(false)}
+                  className={`relative px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${
+                    !isYearly
+                      ? 'text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {!isYearly && (
+                    <motion.div
+                      layoutId="billing-toggle"
+                      className="absolute inset-0 bg-primary rounded-full"
+                      transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  <span className="relative z-10">Monthly</span>
+                </button>
+                <button
+                  onClick={() => setIsYearly(true)}
+                  className={`relative px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${
+                    isYearly
+                      ? 'text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {isYearly && (
+                    <motion.div
+                      layoutId="billing-toggle"
+                      className="absolute inset-0 bg-primary rounded-full"
+                      transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  <span className="relative z-10">Yearly</span>
+                </button>
+                <AnimatePresence>
+                  {isYearly && (
+                    <motion.span
+                      initial={{ opacity: 0, scale: 0.8, x: -10 }}
+                      animate={{ opacity: 1, scale: 1, x: 0 }}
+                      exit={{ opacity: 0, scale: 0.8, x: -10 }}
+                      className="px-3 py-1 bg-accent text-accent-foreground text-xs font-semibold rounded-full"
+                    >
+                      Save 20%
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </div>
             </motion.div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6 max-w-7xl mx-auto">
@@ -148,9 +234,45 @@ export default function PricingPage() {
                     <p className="text-sm text-muted-foreground">{plan.description}</p>
                   </div>
 
-                  <div className="mb-6">
-                    <span className="text-4xl font-bold">{plan.price}</span>
-                    <span className="text-muted-foreground">{plan.period}</span>
+                  <div className="mb-2">
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={`${plan.id}-${isYearly}`}
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        transition={{ duration: 0.2 }}
+                        className="flex items-baseline"
+                      >
+                        <span className="text-4xl font-bold">{getDisplayPrice(plan)}</span>
+                        <span className="text-muted-foreground">{getDisplayPeriod(plan)}</span>
+                      </motion.div>
+                    </AnimatePresence>
+                  </div>
+
+                  <div className="h-6 mb-4">
+                    <AnimatePresence>
+                      {getSavingsLabel(plan) && (
+                        <motion.span
+                          initial={{ opacity: 0, y: -5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -5 }}
+                          className="inline-block px-2 py-0.5 bg-accent/20 text-accent text-xs font-medium rounded"
+                        >
+                          {getSavingsLabel(plan)}
+                        </motion.span>
+                      )}
+                      {isYearly && plan.hasYearly && (
+                        <motion.span
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="block text-xs text-muted-foreground mt-1"
+                        >
+                          Billed ${plan.yearlyPrice}/year
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
                   </div>
 
                   <ul className="space-y-3 mb-8 flex-1">
