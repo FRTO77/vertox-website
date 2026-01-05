@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Globe, ChevronDown, Menu, X, Download } from 'lucide-react';
@@ -25,9 +25,31 @@ const languages = [
   { code: 'RU', name: 'Русский' },
 ];
 
+const navSections = [
+  { name: 'Product', id: 'product' },
+  { name: 'Solutions', id: 'solutions' },
+  { name: 'Customers', id: 'customers' },
+  { name: 'Resources', id: 'resources' },
+];
+
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currentLang, setCurrentLang] = useState('EN');
+  const location = useLocation();
+
+  const scrollToSection = (id: string) => {
+    if (location.pathname !== '/') {
+      window.location.href = `/#${id}`;
+      return;
+    }
+    const element = document.getElementById(id);
+    if (element) {
+      window.scrollTo({
+        top: element.getBoundingClientRect().top + window.pageYOffset - 100,
+        behavior: "smooth"
+      });
+    }
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/60 backdrop-blur-2xl border-b border-border/30">
@@ -40,57 +62,23 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-0.5">
+            {/* Section Navigation */}
+            {navSections.map((section) => (
+              <Button 
+                key={section.id}
+                variant="ghost" 
+                size="sm" 
+                className="text-muted-foreground/90 hover:text-foreground text-[13px] font-medium px-3.5"
+                onClick={() => scrollToSection(section.id)}
+              >
+                {section.name}
+              </Button>
+            ))}
+
             {/* Pricing */}
             <Link to="/pricing">
               <Button variant="ghost" size="sm" className="text-muted-foreground/90 hover:text-foreground text-[13px] font-medium px-3.5">
                 Pricing
-              </Button>
-            </Link>
-
-            {/* Solutions Dropdown */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" size="sm" className="text-muted-foreground/90 hover:text-foreground text-[13px] font-medium px-3.5 gap-1.5">
-                  Solutions <ChevronDown className="h-3 w-3 opacity-60" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-72 p-2 bg-card/95 backdrop-blur-xl border-border/60 shadow-xl" align="start">
-                <div className="grid gap-0.5">
-                  {solutions.map((item) => (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      className="flex flex-col gap-1 p-3 rounded-xl hover:bg-secondary/60 transition-all duration-200"
-                    >
-                      <span className="font-medium text-foreground text-sm">{item.name}</span>
-                      <span className="text-[13px] text-muted-foreground leading-relaxed">{item.description}</span>
-                    </Link>
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
-
-            {/* Resources */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" size="sm" className="text-muted-foreground/90 hover:text-foreground text-[13px] font-medium px-3.5 gap-1.5">
-                  Resources <ChevronDown className="h-3 w-3 opacity-60" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-48 p-2 bg-card/95 backdrop-blur-xl border-border/60 shadow-xl" align="start">
-                <Link
-                  to="/careers"
-                  className="flex p-3 rounded-xl hover:bg-secondary/60 transition-all duration-200 text-foreground text-sm"
-                >
-                  Careers
-                </Link>
-              </PopoverContent>
-            </Popover>
-
-            {/* Community */}
-            <Link to="/community">
-              <Button variant="ghost" size="sm" className="text-muted-foreground/90 hover:text-foreground text-[13px] font-medium px-3.5">
-                Community
               </Button>
             </Link>
 
@@ -167,29 +155,24 @@ export function Header() {
             className="lg:hidden bg-background border-b border-border"
           >
             <div className="container mx-auto px-4 py-4 flex flex-col gap-2">
+              {/* Section Navigation for Mobile */}
+              {navSections.map((section) => (
+                <button
+                  key={section.id}
+                  className="p-3 hover:bg-secondary rounded-lg text-left"
+                  onClick={() => {
+                    scrollToSection(section.id);
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  {section.name}
+                </button>
+              ))}
               <Link to="/pricing" className="p-3 hover:bg-secondary rounded-lg" onClick={() => setMobileMenuOpen(false)}>
                 Pricing
               </Link>
-              <div className="p-3">
-                <span className="text-muted-foreground text-sm">Solutions</span>
-                <div className="mt-2 flex flex-col gap-1 pl-3">
-                  {solutions.map((item) => (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      className="p-2 hover:bg-secondary rounded-lg text-sm"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {item.name}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-              <Link to="/careers" className="p-3 hover:bg-secondary rounded-lg" onClick={() => setMobileMenuOpen(false)}>
-                Careers
-              </Link>
-              <Link to="/community" className="p-3 hover:bg-secondary rounded-lg" onClick={() => setMobileMenuOpen(false)}>
-                Community
+              <Link to="/download" className="p-3 hover:bg-secondary rounded-lg" onClick={() => setMobileMenuOpen(false)}>
+                Desktop Download
               </Link>
               <div className="border-t border-border mt-2 pt-4 flex flex-col gap-2">
                 <Link to="/signin" onClick={() => setMobileMenuOpen(false)}>
