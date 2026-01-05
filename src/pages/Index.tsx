@@ -8,28 +8,30 @@ import { SecuritySection } from '@/components/landing/SecuritySection';
 import { FAQSection } from '@/components/landing/FAQSection';
 import { CTASection } from '@/components/landing/CTASection';
 import { Footer } from '@/components/landing/Footer';
+import { LovableBackground } from '@/components/landing/LovableBackground';
 
 const Index = () => {
   return (
-    <div className="min-h-screen premium-bg">
-      {/* Background effects */}
-      <div className="noise-overlay" />
-      <div className="wave-lines" />
-      <div className="light-beam" />
-      <div className="sound-wave">
-        <span /><span /><span /><span /><span />
-        <span /><span /><span /><span /><span /><span />
-      </div>
+    <div className="min-h-screen">
+      <LovableBackground />
       
       <Header />
       <main className="relative z-10">
-        <HeroSection />
-        <DemoSection />
-        <FeaturesSection />
-        <LanguagesSection />
-        <VoiceCloningSection />
-        <SecuritySection />
-        <FAQSection />
+        <section id="product">
+          <HeroSection />
+        </section>
+        <section id="solutions">
+          <DemoSection />
+          <FeaturesSection />
+        </section>
+        <section id="customers">
+          <LanguagesSection />
+          <VoiceCloningSection />
+          <SecuritySection />
+        </section>
+        <section id="resources">
+          <FAQSection />
+        </section>
         <CTASection />
       </main>
       <Footer />
